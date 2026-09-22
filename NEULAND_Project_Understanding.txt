@@ -1,0 +1,555 @@
+NEULAND / BENJAMIN KATZ PROJECT — PROJECT UNDERSTANDING
+=========================================================
+
+1. PROJECT PURPOSE
+------------------
+This project was built to create an AI-agent + automation system for NEULAND, mainly for:
+- Lead generation
+- Lead qualification
+- Duplicate prevention
+- Google Sheets lead storage
+- Monday.com CRM updates
+- CRM monitoring and follow-ups
+- Operations monitoring
+- Content creation
+- Telegram-based interaction with OpenClaw agents
+
+The goal was not only to build n8n automations, but to make OpenClaw agents behave more like virtual assistants that Benjamin could use from Telegram.
+
+Business context: NEULAND luxury ski / high-end travel, with both B2B and B2C lead-generation use cases.
+
+
+2. MAIN TOOLS / PLATFORMS USED
+------------------------------
+OpenClaw
+- Main AI agent/orchestrator
+- Receives Telegram requests
+- Chooses the right agent/workflow
+- Triggers n8n webhooks
+- Uses AGENTS.md/workspace context
+- Returns final results to Telegram
+
+Telegram
+- Main interface used by Benjamin
+- Separate groups/bots for Lead Gen, CRM, Operations, Content, etc.
+
+n8n
+- Main workflow automation engine
+- Receives webhook requests from OpenClaw
+- Calls Apify
+- Qualifies leads
+- Checks duplicates
+- Routes leads
+- Writes to Google Sheets
+- Sends approved leads to Monday.com CRM
+- Returns final response to OpenClaw
+
+Apify
+- Used as the lead-data / scraping source
+- Returns people + company data
+- Used for both B2B and B2C lead generation
+
+Google Sheets
+- Lead master sheets / working lead database
+- Separate tabs for different ICPs and locations
+- Used for duplicate checking and CRM approval status
+
+Monday.com
+- CRM system
+- Used for pipelines, lead handoff, CRM updates, and follow-up monitoring
+
+Hostinger VPS
+- Hosts Dockerized OpenClaw + n8n services
+- Main VPS: srv1817658.hstgr.cloud
+
+
+3. HIGH-LEVEL LEAD-GEN FLOW
+---------------------------
+Telegram message
+  -> OpenClaw
+  -> Detect B2B/B2C ICP
+  -> Trigger n8n webhook
+  -> Apify search
+  -> Lead qualification
+  -> Google Sheets duplicate check
+  -> Monday.com duplicate check
+  -> Route lead to correct destination
+  -> Append to Google Sheet
+  -> Return counts + destination + sheet URL
+  -> OpenClaw sends result to Telegram
+
+
+4. B2B ICPs
+-----------
+Private Aviation
+- private aviation
+- private jet charter
+- jet charter operator
+- aircraft charter
+- aircraft management
+- fractional aviation
+Destination: B2B Jet Exec
+
+Luxury Travel
+- luxury travel agency
+- luxury tour operator
+- boutique luxury travel
+- high-end travel agency
+- bespoke travel
+- luxury travel advisor
+Destination: B2B Travel Leads
+
+Concierge
+- luxury concierge
+- private concierge
+- lifestyle management
+- VIP concierge
+Destination: B2B Travel Leads
+
+Family Offices / HNW Networks
+- family office
+- single family office
+- multi-family office
+- HNW network
+- private members club
+Destination: Family Offices
+
+
+5. B2C ICPs
+-----------
+Finance
+- financial services
+- banking
+- investment management
+- asset management
+- wealth management
+- private equity
+- venture capital
+
+Real Estate
+- real estate
+- property development
+- real estate investment
+
+Tech
+- software
+- SaaS
+- artificial intelligence
+- cybersecurity
+- cloud software
+- blockchain / crypto
+
+B2C routing:
+- Ski State -> B2C Ski States
+- Major City -> B2C Major Cities
+- Other U.S. location -> B2C General
+
+
+6. GOOGLE SHEET DESTINATIONS
+----------------------------
+B2B:
+- B2B Jet Exec
+- B2B Travel Leads
+- Family Offices
+
+B2C:
+- B2C Ski States
+- B2C Major Cities
+- B2C General
+
+
+7. DUPLICATE CHECKING
+---------------------
+Duplicate matching order:
+1. LinkedIn URL
+2. Email
+3. Full Name + Company
+4. Full Name + Title
+
+Duplicate checks happen against:
+- Existing Google Sheet rows
+- Monday.com CRM
+
+Important issue found:
+One Telegram query sometimes triggered two n8n executions. Both could read the sheet before either finished writing, causing duplicate rows.
+
+Root cause:
+OpenClaw retried after short webhook/tool timeouts.
+
+Rule/fix added:
+- Trigger webhook exactly once per request
+- exec timeout >= 300 seconds
+- curl --max-time >= 300 seconds
+- Poll the same running process
+- Never launch a second webhook because of slow response
+
+
+8. OPENCLAW WEBHOOK TIMEOUT ISSUE
+---------------------------------
+OpenClaw sometimes reported:
+"Webhook timed out (exit code 28)"
+
+Actual cause:
+- n8n + Apify could take 2-3 minutes
+- OpenClaw model-generated exec calls used short timeouts such as 10s / 15s / 30s
+- Sometimes curl used --max-time 30
+- The request was killed before n8n finished
+
+AGENTS.md was updated to require:
+- One webhook call only
+- 300-second exec timeout
+- 300-second curl timeout
+- Poll same process
+- No duplicate n8n execution on timeout
+
+
+9. OPENCLAW GOOGLE SHEET MISUNDERSTANDING
+-----------------------------------------
+OpenClaw sometimes said it could not provide the Google Sheet URL because it did not have direct Google Sheets access.
+
+That was incorrect for lead generation.
+
+The n8n webhook response already returns:
+- Destination sheet/tab
+- Full sheet_url
+
+AGENTS.md was updated so:
+- "Find leads", "pull leads", "generate leads", etc. are always treated as new lead-generation requests
+- OpenClaw should trigger the correct webhook
+- Direct Google Sheets API access is not required to return sheet_url
+- OpenClaw should report the URL exactly as returned by n8n
+
+
+10. APIFY TARGETING ISSUE
+-------------------------
+Private Aviation initially returned unrelated companies such as publishing, landscaping, recruiting, automotive, etc.
+
+The qualification logic correctly rejected them.
+
+Actual cause:
+A long raw Telegram/webhook keyword was being passed to Apify as one company keyword.
+
+Fix:
+Use focused fixed company_keywords arrays inside the Apify request.
+
+Examples:
+Private Aviation:
+- private aviation
+- private jet charter
+- jet charter operator
+- aircraft charter
+- aircraft management
+- fractional aviation
+
+Luxury Travel:
+- luxury travel agency
+- luxury tour operator
+- boutique luxury travel
+- high end travel agency
+- bespoke travel
+- luxury travel advisor
+
+Concierge:
+- luxury concierge service
+- private concierge
+- lifestyle management
+- luxury lifestyle concierge
+- vip concierge
+
+Family Office:
+- family office
+- single family office
+- multi family office
+- HNW network
+- private members club
+
+
+11. QUALIFICATION
+-----------------
+Each lead can contain fields such as:
+- requested_icp
+- assigned_category
+- destination_tab
+- decision_maker_verified
+- company-fit checks
+- revenue
+- required_fields_complete
+- lead_score
+- lead_grade
+- qualification_status
+- rejection_reasons
+- review_reasons
+- fit_notes
+
+Statuses:
+- Qualified
+- Needs Review
+- Rejected
+
+Important lesson:
+If all leads are rejected, first check source targeting. Do not automatically weaken qualification rules.
+
+
+12. EXAMPLE SUCCESSFUL TESTS
+----------------------------
+Private Aviation:
+- 20 processed
+- 3 added
+- 3 needs review
+- 14 rejected
+- Destination: B2B Jet Exec
+- Direct Google Sheet URL returned
+
+Finance B2C:
+- 25 processed
+- 8 added
+- 0 needs review
+- 17 rejected
+- Destination: B2C Major Cities
+- Direct Google Sheet URL returned
+- Issues: none
+
+
+13. LEAD COUNT BEHAVIOR
+-----------------------
+B2C workflow used:
+
+fetch_count: Math.min(
+  Number($('Webhook').first().json.body.count || 5),
+  50
+)
+
+Meaning:
+- count 10 -> process 10
+- count 25 -> process 25
+- count 50 -> process 50
+- no count -> default 5
+- above 50 -> capped at 50
+
+Important:
+50 processed does not necessarily mean 50 qualified.
+Rejected, needs-review, and duplicate leads reduce the number actually added.
+
+Benjamin's stated target:
+- 50/day
+
+Need to distinguish:
+- 50 candidates processed/day
+vs
+- 50 final qualified/new leads/day
+
+
+14. CRM APPROVAL WORKFLOWS
+--------------------------
+Two n8n workflows:
+1. B2B Leads – Approved to Monday CRM
+2. B2C Leads – Approved to Monday CRM
+
+They:
+- Read source sheet tabs
+- Keep row_number
+- Read CRM approval status
+- Route approved leads to Monday.com
+- Return to original sheet
+- Set CRM Approval = Done
+
+Approval values:
+- Pending Review
+- Approved -> Benjamin B2B
+- Approved -> General B2B
+- Approved -> Warm B2C
+- Rejected
+- Done
+
+
+15. CRM / MONDAY.COM ISSUE
+--------------------------
+Benjamin reported:
+- CRM bot was mapping some leads into wrong groups
+- CRM bot was not giving daily updates
+
+This remained an important validation/fix area:
+- Correct board/group mapping
+- Daily pipeline summary
+- Follow-up / stuck-lead detection
+- More autonomous CRM-agent behavior
+
+
+16. GMAIL + GOOGLE CALENDAR
+---------------------------
+Benjamin needs Gmail and Calendar for CRM management.
+
+Observed issue:
+- Google OAuth credential files existed
+- Live API tests returned 401 UNAUTHENTICATED
+- Access token was expired
+
+Correct long-term behavior should be:
+1. Detect expired access token
+2. Use refresh_token
+3. Get new access token
+4. Save token/expiry
+5. Retry API request
+6. Only report disconnected if refresh itself fails
+
+Random delays are not a solution.
+
+Also check Google OAuth publishing status because testing-mode apps can have token lifecycle limitations.
+
+
+17. TELEGRAM OLD GROUP / CRON ERROR
+-----------------------------------
+Error:
+403 Forbidden — bot is not a member of Telegram chat -1001669253459
+
+Meaning:
+A scheduled/cron task was still trying to send to an old Telegram group the bot no longer had access to.
+
+This issue was separate from lead-generation logic.
+
+
+18. CONTENT AGENT EXPECTATION
+-----------------------------
+Benjamin expected the Content bot to behave like an actual agent:
+Research -> Insights -> Draft -> Final content
+
+He specifically complained that the content bot was not creating content based on research.
+
+
+19. OPERATIONS AGENT EXPECTATION
+--------------------------------
+Operations agent should:
+- Review tasks
+- Find overdue items
+- Find upcoming priorities
+- Surface blockers
+- Notify Benjamin proactively
+
+
+20. BENJAMIN'S CORE FEEDBACK
+----------------------------
+Benjamin's main concern was that the setup felt like:
+"an n8n automation that I can text from Telegram"
+
+He expected:
+"an OpenClaw agent that can replace my VA"
+
+So the agents should:
+- Understand natural-language requests
+- Use tools automatically
+- Handle retries/token refresh
+- Monitor things proactively
+- Send daily updates
+- Research before creating content
+- Read/update CRM correctly
+- Complete workflows end-to-end
+- Avoid avoidable permission/timeout failures
+
+
+21. INFRASTRUCTURE / VPS
+------------------------
+Hostinger VPS:
+- srv1817658.hstgr.cloud
+- IP: 72.60.133.248
+- Used for n8n + OpenClaw + Docker
+
+A storage issue happened:
+- n8n SQLite database grew very large (~75GB)
+- Main cause was execution-history retention
+
+Pruning settings were added to limit future growth.
+
+Important:
+- Do not delete n8n DB casually
+- Do not blindly VACUUM with low free disk
+- Avoid dangerous Docker volume pruning
+
+The VPS is paid for about another year and can be reused for other projects.
+
+
+22. APIFY SUBSCRIPTION
+----------------------
+The Apify subscription was ended so recurring billing would stop after the current period.
+
+
+23. FINAL ARCHITECTURE
+----------------------
+Telegram
+   |
+   v
+OpenClaw Orchestrator
+   |
+   +--> Lead Gen Agent
+   |       |
+   |       v
+   |      n8n
+   |       |
+   |       v
+   |      Apify
+   |       |
+   |       v
+   |      Qualification
+   |       |
+   |       v
+   |      Google Sheets duplicate check
+   |       |
+   |       v
+   |      Monday.com duplicate check
+   |       |
+   |       v
+   |      Google Sheets
+   |       |
+   |       v
+   |      Final webhook response
+   |       |
+   |       v
+   |      Telegram
+   |
+   +--> CRM Agent
+   |       +--> Monday.com
+   |       +--> Gmail
+   |       +--> Google Calendar
+   |       +--> Daily summaries/follow-ups
+   |
+   +--> Content Agent
+   |       +--> Research
+   |       +--> Content generation
+   |
+   +--> Operations Agent
+           +--> Task monitoring
+           +--> Proactive updates
+
+
+24. COMPLETED / SUBSTANTIALLY IMPLEMENTED
+-----------------------------------------
+- Telegram -> OpenClaw -> n8n lead generation
+- B2B ICP routing
+- B2C ICP routing
+- Apify integration
+- Qualification logic
+- Sheet duplicate checks
+- Monday duplicate checks
+- Google Sheet append
+- Direct sheet URL returned in Telegram
+- CRM approval workflows
+- 300-second webhook/single-execution rules
+- Improved Apify targeting
+- Working Private Aviation test
+- Working Finance B2C test
+
+
+25. STILL NEEDING VALIDATION / FURTHER WORK
+-------------------------------------------
+- CRM lead-to-group mapping
+- CRM daily autonomous updates
+- Gmail automatic OAuth refresh
+- Google Calendar automatic OAuth refresh
+- Content agent research-driven behavior
+- Operations agent autonomous behavior
+- Old Telegram cron/group cleanup
+- Full VA-style autonomous behavior across all agents
+
+
+26. ONE-LINE SUMMARY
+--------------------
+NEULAND's project was an OpenClaw + n8n AI-agent system designed to let Benjamin manage lead generation, CRM, operations, and content through Telegram, using Apify for lead sourcing, Google Sheets for storage, Monday.com for CRM, and a Hostinger VPS for infrastructure.

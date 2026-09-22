@@ -1,0 +1,3185 @@
+{
+  "name": "Lead Generation Specialist (B2C)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2224,
+        -80
+      ],
+      "id": "bbe84ad7-caea-493e-ba90-a7435a24ad3d",
+      "name": "Wait",
+      "webhookId": "adab8435-7bcd-4431-87a9-99fd30f9b3e8"
+    },
+    {
+      "parameters": {
+        "url": "={{\n  'https://api.apify.com/v2/actor-runs/' +\n  $json.data.id +\n  '?waitForFinish=300'\n}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2000,
+        -80
+      ],
+      "id": "aa64ba7e-6e6b-4f03-90fd-ac4796ea2e5c",
+      "name": "Check Apify Run Status",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oGQg91DdqrrBk3Xx",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "OpenClaw-query-B2C",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2896,
+        400
+      ],
+      "id": "fa4bc838-2968-4c22-ac2e-ef9e327d32aa",
+      "name": "Webhook",
+      "webhookId": "71439013-24f5-4d01-b4ab-31a38277d4c2"
+    },
+    {
+      "parameters": {
+        "url": "={{'https://api.apify.com/v2/datasets/' + $json.data.defaultDatasetId + '/items?clean=true&format=json&limit=' + $('Webhook').first().json.body.count}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1552,
+        -80
+      ],
+      "id": "1a750f08-d8e6-4960-a480-94a98cfc7986",
+      "name": "Get Apify Dataset Items",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd05e579-3c1c-4d91-a159-00e5551144e2",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "SUCCEEDED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1776,
+        -80
+      ],
+      "id": "d78de3a4-ad0d-4ce2-a6e6-ae847c2990d7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actors/code_crafter~leads-finder/runs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_iO64nuYy2oad9afB9bQnfeU8b3A7KI3FpH2a"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  fetch_count: Math.min(\n    Number($('Webhook').first().json.body.count || 5),\n    50\n  ),\n\n  file_name: \"Neuland B2C Real Estate\",\n\n  contact_job_title: [\n    \"Founder\",\n    \"Co-Founder\",\n    \"Owner\",\n    \"Founder & CEO\",\n    \"CEO\",\n    \"Chief Executive Officer\",\n    \"President\",\n    \"Managing Partner\",\n    \"Founding Partner\",\n    \"COO\",\n    \"CMO\",\n    \"CTO\"\n  ],\n\n  contact_not_job_title: [\n    \"Sales Representative\",\n    \"Sales Executive\",\n    \"Account Executive\",\n    \"Assistant\",\n    \"Coordinator\",\n    \"Analyst\",\n    \"Associate\",\n    \"Intern\"\n  ],\n\n  seniority_level: [\n    \"founder\",\n    \"owner\",\n    \"c_suite\",\n    \"partner\"\n  ],\n\n  contact_city: [\n    \"denver\"\n  ],\n\n  email_status: [\n    \"validated\",\n    \"unknown\"\n  ],\n\n  company_industry: [\n    \"real estate\"\n  ],\n\n  company_keywords: [\n    \"real estate\",\n    \"property development\",\n    \"real estate investment\"\n  ],\n\n  min_revenue: \"10M\",\n  max_revenue: \"100M\"\n} }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2448,
+        -80
+      ],
+      "id": "31994187-a15e-475a-9d9d-086c3105162f",
+      "name": "Start Apify Leads Finder2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Qualified",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eb70daf5-9a86-443d-be71-cde92a49c974"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Qualified"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c340bd89-9073-434b-86f2-0e43cc9173b1",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "=Needs Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs Review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9d1394c9-54a1-4d50-8190-9c88f05f1aa3",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        -96
+      ],
+      "id": "f8207d64-317c-4c1c-887c-97a7e2d5c270",
+      "name": "Route by Qualification Status"
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\n * INPUT:\n * $input.all() = existing rows from the selected Google Sheet tab.\n *\n * QUALIFIED LEADS:\n * Output 0 of \"Route by Qualification Status\".\n */\n\nconst existingRows = $input\n  .all()\n  .map(item => item.json);\n\nconst qualifiedLeads = $(\n  'Route by Qualification Status'\n)\n  .all(0)\n  .map(item => item.json);\n\n/*\n * Return the first non-empty value found\n * from the supplied possible column names.\n */\n\nfunction getValue(row, possibleNames) {\n  for (const name of possibleNames) {\n    const value = row?.[name];\n\n    if (\n      value !== undefined &&\n      value !== null &&\n      String(value).trim() !== ''\n    ) {\n      return String(value).trim();\n    }\n  }\n\n  return '';\n}\n\n/*\n * Parse the Raw Row Data column when available.\n *\n * Some older sheet rows may have shifted columns,\n * while the correct original values remain inside\n * Raw Row Data as JSON.\n */\n\nfunction parseRawRowData(row) {\n  const possibleNames = [\n    'Raw Row Data',\n    'raw_row_data',\n    'Raw Data',\n    'raw_data',\n    'rawRowData',\n  ];\n\n  for (const name of possibleNames) {\n    const rawValue = row?.[name];\n\n    if (\n      rawValue === undefined ||\n      rawValue === null ||\n      rawValue === ''\n    ) {\n      continue;\n    }\n\n    if (\n      typeof rawValue === 'object' &&\n      !Array.isArray(rawValue)\n    ) {\n      return rawValue;\n    }\n\n    try {\n      const parsed = JSON.parse(\n        String(rawValue)\n      );\n\n      if (\n        parsed &&\n        typeof parsed === 'object' &&\n        !Array.isArray(parsed)\n      ) {\n        return parsed;\n      }\n    } catch {\n      // Invalid Raw Row Data is safely ignored.\n    }\n  }\n\n  return {};\n}\n\n/*\n * Check the normal row first.\n * If the value is missing, check Raw Row Data.\n */\n\nfunction getValueFromBoth(\n  row,\n  rawRow,\n  possibleNames\n) {\n  return (\n    getValue(row, possibleNames) ||\n    getValue(rawRow, possibleNames)\n  );\n}\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/\\s+/g, ' ');\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(\n      /^https?:\\/\\/(www\\.)?/,\n      ''\n    )\n    .replace(/\\/+$/, '');\n}\n\nfunction getFullName(row, rawRow = {}) {\n  const directName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'full_name',\n        'Full Name',\n        'Full name',\n        'Name',\n        'name',\n      ]\n    );\n\n  if (directName) {\n    return normalizeText(\n      directName\n    );\n  }\n\n  const firstName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'first_name',\n        'First name',\n        'First Name',\n        'firstname',\n      ]\n    );\n\n  const lastName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'last_name',\n        'Last Name',\n        'Last name',\n        'lastname',\n      ]\n    );\n\n  return normalizeText(\n    `${firstName} ${lastName}`\n  );\n}\n\nfunction getKeys(row) {\n  const rawRow =\n    parseRawRowData(row);\n\n  const linkedin =\n    normalizeLinkedIn(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'linkedin',\n          'Linkedin',\n          'LinkedIn',\n          'LinkedIn URL',\n          'linkedin_url',\n          'linkedinUrl',\n        ]\n      )\n    );\n\n  const email =\n    normalizeEmail(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'email',\n          'Email',\n          'Email Address',\n          'work_email',\n          'Work Email',\n          'personal_email',\n          'Personal Email',\n        ]\n      )\n    );\n\n  const fullName =\n    getFullName(\n      row,\n      rawRow\n    );\n\n  const company =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'company_name',\n          'company name',\n          'Company Name',\n          'Company',\n          'company',\n        ]\n      )\n    );\n\n  const title =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'job_title',\n          'title',\n          'Title',\n          'Job Title',\n        ]\n      )\n    );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Create lookup sets from all existing\n * Google Sheet rows.\n */\n\nconst existingLinkedIn =\n  new Set();\n\nconst existingEmails =\n  new Set();\n\nconst existingNameCompany =\n  new Set();\n\nconst existingNameTitle =\n  new Set();\n\nfor (const row of existingRows) {\n  const keys = getKeys(row);\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare qualified leads in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\n\nfor (const lead of qualifiedLeads) {\n  const keys = getKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    existingLinkedIn.has(\n      keys.linkedin\n    )\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    existingEmails.has(\n      keys.email\n    )\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    existingNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    existingNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Existing lead:\n   * do not return it.\n   */\n\n  if (duplicateMatchedBy) {\n    continue;\n  }\n\n  /*\n   * Immediately add accepted lead keys\n   * to the lookup sets.\n   *\n   * This also prevents duplicates inside\n   * the current qualified batch.\n   */\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      master_sheet_duplicate:\n        false,\n\n      master_sheet_duplicate_check:\n        'Passed',\n\n      next_step:\n        'Check Monday.com CRM boards for duplicates',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        -224
+      ],
+      "id": "2a03b74a-94d3-48cc-ac82-b12f49c39b51",
+      "name": "Remove Master Sheet Duplicates",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\n * Monday items are the direct input to this node.\n * Candidate leads are taken from:\n * \"Remove Master Sheet Duplicates\"\n */\n\nconst mondayItems = $input\n  .all()\n  .map(item => item.json);\n\nconst candidateLeads = $(\n  'Remove Master Sheet Duplicates'\n)\n  .all()\n  .map(item => item.json);\n\n/*\n * Normalization helpers\n */\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/[’']/g, '')\n    .replace(/[^\\p{L}\\p{N}@.+:/\\-\\s]/gu, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(/^https?:\\/\\/(www\\.)?/, '')\n    .replace(/\\/+$/, '');\n}\n\nfunction normalizeCompany(value) {\n  return normalizeText(value)\n    .replace(\n      /\\b(incorporated|inc|llc|ltd|limited|corp|corporation)\\b/g,\n      ''\n    )\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\n/*\n * Read a Monday column by its visible title.\n *\n * Monday output contains:\n * item.name\n * item.column_values[].column.title\n * item.column_values[].text\n */\n\nfunction getMondayColumn(item, wantedTitles) {\n  const wanted = wantedTitles.map(\n    title => normalizeText(title)\n  );\n\n  const columns = Array.isArray(\n    item.column_values\n  )\n    ? item.column_values\n    : [];\n\n  const match = columns.find(column => {\n    const title = normalizeText(\n      column?.column?.title\n    );\n\n    return wanted.includes(title);\n  });\n\n  if (!match) {\n    return '';\n  }\n\n  if (\n    match.text !== undefined &&\n    match.text !== null &&\n    String(match.text).trim() !== ''\n  ) {\n    return String(match.text).trim();\n  }\n\n  /*\n   * Fallback for columns where Monday puts\n   * the useful information inside \"value\".\n   */\n  if (match.value) {\n    try {\n      const parsed =\n        typeof match.value === 'string'\n          ? JSON.parse(match.value)\n          : match.value;\n\n      return String(\n        parsed?.email ??\n        parsed?.text ??\n        parsed?.url ??\n        parsed?.label ??\n        ''\n      ).trim();\n    } catch {\n      return '';\n    }\n  }\n\n  return '';\n}\n\nfunction getMondayFullName(item) {\n  const firstName = getMondayColumn(\n    item,\n    ['First Name', 'First name']\n  );\n\n  const lastName = getMondayColumn(\n    item,\n    ['Last Name', 'Last name']\n  );\n\n  const combinedName = normalizeText(\n    `${firstName} ${lastName}`\n  );\n\n  /*\n   * Monday item.name is also the lead name,\n   * so use it when First Name/Last Name are empty.\n   */\n  return combinedName ||\n    normalizeText(item.name);\n}\n\nfunction getMondayKeys(item) {\n  const fullName =\n    getMondayFullName(item);\n\n  const linkedin = normalizeLinkedIn(\n    getMondayColumn(item, [\n      'Linkedin',\n      'LinkedIn',\n      'LinkedIn URL',\n    ])\n  );\n\n  const email = normalizeEmail(\n    getMondayColumn(item, [\n      'Email',\n      'Email Address',\n    ])\n  );\n\n  const company = normalizeCompany(\n    getMondayColumn(item, [\n      'Company',\n      'Company Name',\n    ])\n  );\n\n  const title = normalizeText(\n    getMondayColumn(item, [\n      'Title',\n      'Job Title',\n    ])\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\nfunction getCandidateFullName(lead) {\n  const directName = normalizeText(\n    lead.full_name ??\n    lead['Full Name'] ??\n    lead.name\n  );\n\n  if (directName) {\n    return directName;\n  }\n\n  return normalizeText(\n    `${\n      lead.first_name ??\n      lead['First Name'] ??\n      ''\n    } ${\n      lead.last_name ??\n      lead['Last Name'] ??\n      ''\n    }`\n  );\n}\n\nfunction getCandidateKeys(lead) {\n  const fullName =\n    getCandidateFullName(lead);\n\n  const linkedin = normalizeLinkedIn(\n    lead.linkedin ??\n    lead.LinkedIn ??\n    lead.Linkedin ??\n    lead['LinkedIn URL']\n  );\n\n  const email = normalizeEmail(\n    lead.email ??\n    lead.Email ??\n    lead['Email Address']\n  );\n\n  const company = normalizeCompany(\n    lead.company_name ??\n    lead['company name'] ??\n    lead['Company Name'] ??\n    lead.Company\n  );\n\n  const title = normalizeText(\n    lead.job_title ??\n    lead.title ??\n    lead.Title ??\n    lead['Job Title']\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Build lookup sets from all Monday items.\n */\n\nconst mondayLinkedIn = new Set();\nconst mondayEmails = new Set();\nconst mondayNameCompany = new Set();\nconst mondayNameTitle = new Set();\n\nfor (const item of mondayItems) {\n  const keys = getMondayKeys(item);\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\nconst duplicateDetails = [];\n\nfor (const lead of candidateLeads) {\n  const keys = getCandidateKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    mondayLinkedIn.has(keys.linkedin)\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    mondayEmails.has(keys.email)\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    mondayNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    mondayNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Duplicate exists in Monday:\n   * skip it and do not send it to Google Sheets.\n   */\n  if (duplicateMatchedBy) {\n    duplicateDetails.push({\n      full_name:\n        lead.full_name ?? '',\n      company_name:\n        lead.company_name ?? '',\n      matched_by:\n        duplicateMatchedBy,\n    });\n\n    continue;\n  }\n\n  /*\n   * Add accepted leads to the sets immediately.\n   * This also prevents duplicates inside the\n   * current candidate batch.\n   */\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      monday_duplicate: false,\n      monday_duplicate_check:\n        'Passed',\n\n      monday_items_checked:\n        mondayItems.length,\n\n      monday_duplicates_skipped:\n        duplicateDetails.length,\n\n      next_step:\n        'Append to B2B Private Jet Leads sheet',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        64
+      ],
+      "id": "5ae48403-5f78-44ff-8809-74f36fce94cf",
+      "name": "Remove Monday Duplicates",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        -160
+      ],
+      "id": "1aa35670-e285-48ac-9725-ef27a3bc3b34",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "18198302679",
+        "groupId": "group_mkwt6xw8",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        64
+      ],
+      "id": "aeb95183-fb31-4373-89e9-fe25ba06e593",
+      "name": "Get items by General Pipeline",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9661187741",
+        "groupId": "group_mm0mxgx",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        64
+      ],
+      "id": "5d2b56bb-0df6-48f7-b9b6-5113d1db1647",
+      "name": "Get items by Benjimin Pipeline",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9782799884",
+        "groupId": "group_mkx1995a",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        64
+      ],
+      "id": "5a67da33-69d4-4cbd-b878-ff7cfc66abd5",
+      "name": "Get many by Warm Pipeline",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": []
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1584,
+        336
+      ],
+      "id": "0f31a932-72b0-4016-a2d3-f3fbd3255a81",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fdd396fb-272c-4e13-a8b3-6b58896c3007",
+              "leftValue": "={{ $json.qualification_status }}",
+              "rightValue": "Qualified",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        -144
+      ],
+      "id": "2e5429bb-008e-4796-aa71-b2867c8117c9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Get qualified count directly from the sheet append node\nlet actuallyAddedToSheet = 0;\ntry {\n  actuallyAddedToSheet = $('Append or update row in sheet').all().length || 0;\n} catch (e) {\n  actuallyAddedToSheet = 0;\n}\n\nconst needsReview = items.filter(i => \n  i.json.qualification_status === 'Needs Review'\n);\n\nconst rejected = items.filter(i => \n  i.json.qualification_status === 'Rejected'\n);\n\nconst revenueRejected = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('revenue')\n);\n\nconst wrongIndustry = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('unrelated industry')\n);\n\nconst notAviation = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('no reliable evidence')\n);\n\nreturn [{\n  json: {\n    status: \"complete\",\n    icp: \"Private Aviation\",\n    total_processed: items.length,\n    actually_added_to_sheet: actuallyAddedToSheet,\n    needs_review: needsReview.length,\n    rejected: rejected.length,\n    rejection_breakdown: {\n      revenue_out_of_range: revenueRejected.length,\n      wrong_industry: wrongIndustry.length,\n      not_private_aviation: notAviation.length\n    },\n    sheet_updated: actuallyAddedToSheet > 0 ? \"Yes\" : \"No\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -144
+      ],
+      "id": "190e2048-89c1-4d71-a2cc-42b42762c3a6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1136,
+        -144
+      ],
+      "id": "4fb2b355-e5d2-4482-a14b-22d46e5baff7",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get items from BOTH previous nodes by name\nconst sheetItems = $('Remove Master Sheet Duplicates').all().map(item => item.json);\nconst mondayItems = $('Remove Monday Duplicates').all().map(item => item.json);\n\n// UNION - combine both arrays and remove only exact duplicates\nconst allItems = [...sheetItems, ...mondayItems];\n\nconst seen = new Set();\nconst union = [];\n\nfor (const lead of allItems) {\n  // Create unique key using email + linkedin + company\n  const email = (lead.email || '').toLowerCase().trim();\n  const linkedin = (lead.linkedin || '').toLowerCase().trim();\n  const company = (lead.company_name || '').toLowerCase().trim();\n  const key = `${email}|${linkedin}|${company}`;\n  \n  if (!seen.has(key)) {\n    seen.add(key);\n    union.push({ json: lead });\n  }\n}\n\nreturn union;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -224
+      ],
+      "id": "9bb90b6f-66c5-451f-a349-2b810cc4743e",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.icp }}",
+                    "rightValue": "real_estate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2a2ba353-221e-410e-97b1-29b50db14272"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Real Estate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "60bfb835-b02d-4237-91a4-878fe06f67c8",
+                    "leftValue": "={{ $json.body.icp }}",
+                    "rightValue": "finance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Finance"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d8fa7ee2-30e7-42cd-ac6d-a0ae174541c8",
+                    "leftValue": "={{ $json.body.icp }}",
+                    "rightValue": "tech",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tech"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2672,
+        384
+      ],
+      "id": "aa4fd39d-d1b5-473c-bc96-c3e892c74730",
+      "name": "Switch"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2224,
+        400
+      ],
+      "id": "d2108f74-837d-4467-af69-ac6a9997b2c5",
+      "name": "Wait1",
+      "webhookId": "fc8aabdb-c2dd-44c9-9647-ec445df55390"
+    },
+    {
+      "parameters": {
+        "url": "={{\n  'https://api.apify.com/v2/actor-runs/' +\n  $json.data.id +\n  '?waitForFinish=300'\n}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2000,
+        400
+      ],
+      "id": "d9a9c4b6-4a1c-48bb-8e71-744c2e1a6a1e",
+      "name": "Check Apify Run Status1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oGQg91DdqrrBk3Xx",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        256
+      ],
+      "id": "23125f7d-a76d-4656-8d21-0b1da4ef527d",
+      "name": "Read Existing B2B Private Jet Leads1",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Webhook').first().json.body ?? {};\n\nconst currentYear = new Date().getUTCFullYear();\n\nfunction normalizeText(value) {\n  return String(value ?? '').trim().toLowerCase().replace(/\\s+/g, ' ');\n}\n\nfunction normalizeLinkedIn(value) {\n  return normalizeText(value)\n    .split('?')[0]\n    .split('#')[0]\n    .replace(/^https?:\\/\\/(www\\.)?linkedin\\.com\\//, 'linkedin.com/')\n    .replace(/\\/+$/, '');\n}\n\nfunction parseRevenue(lead) {\n  const rawRevenue = String(lead.company_annual_revenue ?? '').replace(/[$,\\s]/g, '');\n  if (rawRevenue && Number.isFinite(Number(rawRevenue))) return Number(rawRevenue);\n\n  const cleanRevenue = String(lead.company_annual_revenue_clean ?? '').trim().toUpperCase();\n  const match = cleanRevenue.match(/^([\\d.]+)\\s*([KMB])?$/);\n  if (!match) return NaN;\n\n  const multiplier = { K: 1_000, M: 1_000_000, B: 1_000_000_000 }[match[2]] ?? 1;\n  return Number(match[1]) * multiplier;\n}\n\nfunction uniqueReasons(reasons) {\n  return [...new Set(reasons)];\n}\n\nconst minimumRevenue = Number(config.minimum_revenue ?? 50_000_000);\nconst maximumRevenue = Number(config.maximum_revenue ?? 500_000_000);\nconst maximumEmployees = Number(config.maximum_employees ?? 50);\n\nconst priorityStates = new Set(\n  (config.priority_states ?? ['Colorado', 'Utah', 'California', 'Vermont', 'Wyoming', 'New York', 'Florida']).map(normalizeText)\n);\n\nconst reviewedLeads = [];\n\nfor (const item of $input.all()) {\n  const lead = item.json;\n  const rejectionReasons = [];\n  const reviewReasons = [];\n  const positiveSignals = [];\n\n  const title = normalizeText(lead.job_title);\n  const industry = normalizeText(lead.industry);\n  const companyName = String(lead.company_name ?? '').trim();\n  const companyState = String(lead.company_state ?? lead.state ?? '').trim();\n  const country = normalizeText(lead.company_country ?? lead.country);\n  const companySize = Number(lead.company_size);\n  const revenue = parseRevenue(lead);\n  const foundedYear = Number(lead.company_founded_year);\n\n  const companyAge = Number.isFinite(foundedYear) && foundedYear > 1800 && foundedYear <= currentYear\n    ? currentYear - foundedYear : null;\n\n  const primaryCompanyText = [\n    lead.company_name,\n    lead.industry,\n    lead.company_description,\n    lead.headline,\n    lead.company_domain,\n  ].filter(Boolean).join(' ').toLowerCase();\n\n  const keywordText = normalizeText(lead.keywords);\n\n  // Decision-maker check for LUXURY TRAVEL\n  const isDecisionMaker = /\\b(founder|co-founder|ceo|president|owner|coo|cmo|head travel advisor|head of travel|head of concierge|head of marketing|head of partnerships|managing partner)\\b/i.test(title);\n\n  if (!isDecisionMaker) {\n    rejectionReasons.push(\n      'Contact is not Founder, CEO, President, Owner, COO, CMO, Head Travel Advisor, Head of Concierge, Marketing, or Partnerships'\n    );\n  }\n\n  const excludedTitle = /\\b(junior|assistant|coordinator|independent advisor|travel agent|hosted agent)\\b/i.test(title);\n  if (excludedTitle && !isDecisionMaker) {\n    rejectionReasons.push('Contact has an excluded or non-decision-making role');\n  }\n\n  // Geography\n  if (!['united states', 'us', 'usa'].includes(country)) {\n    rejectionReasons.push('Company is not based in the United States');\n  }\n\n  // Revenue - $50M+ bookings\n  if (!Number.isFinite(revenue)) {\n    rejectionReasons.push('Company revenue is missing or invalid');\n  } else if (revenue < minimumRevenue || revenue > maximumRevenue) {\n    rejectionReasons.push('Company revenue is outside the required $50M-$500M range');\n  }\n\n  // Employees - 10-50 agents\n  if (!Number.isFinite(companySize)) {\n    reviewReasons.push('Employee count requires verification');\n  } else if (companySize < 1 || companySize > maximumEmployees) {\n    rejectionReasons.push('Company has more than the maximum 50 employees or has an invalid employee count');\n  }\n\n  // LUXURY TRAVEL AGENCY VERIFICATION\n  const strongLuxuryTravelCore = /\\b(luxury travel agency|luxury travel|luxury tour operator|boutique travel|boutique travel agency|luxury travel advisor|travel agency|travel advisor|tour operator|luxury tours|bespoke travel|premium travel|high-end travel|affluent travel|luxury vacations|luxury holiday|luxury cruise)\\b/i.test(\n    `${primaryCompanyText} ${keywordText}`\n  );\n\n  const luxuryTravelIndustry = /\\b(leisure, travel|travel & tourism|hospitality|travel|tourism)\\b/i.test(industry);\n\n  const affluentClientSignal = /\\b(affluent|high-net-worth|hnw|luxury|vip|elite|premium|exclusive|bespoke|ultra-high|wealthy|discerning|principals)\\b/i.test(\n    `${primaryCompanyText} ${keywordText}`\n  );\n\n  // Reject if not luxury travel\n  if (!strongLuxuryTravelCore) {\n    rejectionReasons.push(\n      'No reliable evidence that the company is a boutique luxury travel agency or medium-sized luxury travel agency'\n    );\n  }\n\n  // Exclude specific companies\n  if (/\\b(virtuoso|fora|black tomato)\\b/i.test(companyName)) {\n    rejectionReasons.push('Company is specifically excluded (Virtuoso, Fora, Black Tomato are too large)');\n  }\n\n  // Reject unrelated industries\n  const unrelatedIndustry = /\\b(pharmaceuticals|medical practice|health, wellness|construction|manufacturing|logistics|freight|trucking|railroad|oil|energy|textiles|retail|food & beverages|architecture|design|real estate brokerage|public relations|advertising|events services|coffee|beverages)\\b/i.test(industry);\n\n  if (unrelatedIndustry && !strongLuxuryTravelCore) {\n    rejectionReasons.push('Company operates in an unrelated industry rather than luxury travel');\n  }\n\n  // Positive signals\n  if (strongLuxuryTravelCore) positiveSignals.push('Strong luxury-travel-agency evidence');\n  if (luxuryTravelIndustry) positiveSignals.push('Travel/hospitality industry');\n  if (affluentClientSignal) positiveSignals.push('Affluent client access signal');\n  if (Number.isFinite(revenue) && revenue >= minimumRevenue && revenue <= maximumRevenue) positiveSignals.push('Revenue is within $50M-$500M');\n  if (Number.isFinite(companySize) && companySize >= 1 && companySize <= maximumEmployees) positiveSignals.push('Employee count is within 10-50 range');\n\n  const isPriorityState = priorityStates.has(normalizeText(companyState));\n  if (isPriorityState) positiveSignals.push('Located in a priority state');\n\n  if (companyAge !== null && companyAge >= 5) positiveSignals.push('Established company');\n\n  // Data completeness\n  const requiredValues = [\n    lead.full_name,\n    lead.linkedin,\n    lead.job_title,\n    lead.company_name,\n    lead.company_domain ?? lead.company_website,\n    country,\n  ];\n\n  const requiredFieldsComplete = requiredValues.every(v => v !== undefined && v !== null && String(v).trim() !== '') &&\n    Number.isFinite(revenue) && Number.isFinite(companySize);\n\n  if (!requiredFieldsComplete) reviewReasons.push('One or more required lead fields are missing');\n\n  // Scoring\n  let leadScore = 0;\n  if (isDecisionMaker) leadScore += 25;\n  if (strongLuxuryTravelCore) leadScore += 30;\n  if (affluentClientSignal) leadScore += 10;\n  if (Number.isFinite(revenue) && revenue >= minimumRevenue && revenue <= maximumRevenue) leadScore += 15;\n  if (Number.isFinite(companySize) && companySize >= 1 && companySize <= maximumEmployees) leadScore += 10;\n  leadScore += isPriorityState ? 5 : 2;\n  if (companyAge !== null && companyAge >= 5) leadScore += 5;\n  else if (companyAge !== null) leadScore += 2;\n  if (requiredFieldsComplete) leadScore += 5;\n\n  leadScore = Math.min(100, leadScore);\n  const leadGrade = leadScore >= 85 ? 'A' : leadScore >= 70 ? 'B' : 'C';\n\n  const uniqueRejectionReasons = uniqueReasons(rejectionReasons);\n  const uniqueReviewReasons = uniqueReasons(reviewReasons);\n\n  let qualificationStatus;\n  if (uniqueRejectionReasons.length > 0) {\n    qualificationStatus = 'Rejected';\n  } else if (!strongLuxuryTravelCore || uniqueReviewReasons.length > 0 || !requiredFieldsComplete || leadGrade !== 'A') {\n    qualificationStatus = 'Needs Review';\n  } else {\n    qualificationStatus = 'Qualified';\n  }\n\n  const estimatedRevenueText = Number.isFinite(revenue) ? `$${(revenue / 1_000_000).toFixed(1)}M` : 'unconfirmed revenue';\n\n  const companyTypeText = strongLuxuryTravelCore\n    ? 'luxury travel agency'\n    : 'company outside the confirmed luxury travel ICP';\n\n  const gptSummary =\n    `${lead.full_name ?? 'This contact'} is ${lead.job_title ?? 'a contact'} at ${companyName || 'an unidentified company'}, a ${companyTypeText}. ` +\n    `The company is reported at approximately ${estimatedRevenueText} in revenue with ${Number.isFinite(companySize) ? companySize : 'an unconfirmed number of'} employees. ` +\n    `${\n      qualificationStatus === 'Qualified'\n        ? 'The lead meets the current Neuland Luxury Travel Partnership criteria.'\n        : qualificationStatus === 'Needs Review'\n          ? 'The lead requires manual verification before it can be accepted.'\n          : 'The lead does not meet the current Luxury Travel Partnership criteria.'\n    }`;\n\n  const sdrNote =\n    `Automated luxury-travel candidate from Apify. ` +\n    `Status: ${qualificationStatus}. ` +\n    `${\n      uniqueRejectionReasons.length\n        ? `Reject because: ${uniqueRejectionReasons.join('; ')}.`\n        : uniqueReviewReasons.length\n          ? `Review because: ${uniqueReviewReasons.join('; ')}.`\n          : 'Company and contact match the assigned ICP.'\n    }`;\n\n  reviewedLeads.push({\n    json: {\n      ...lead,\n      revenue_numeric: revenue,\n      company_age: companyAge,\n      priority_state: isPriorityState,\n      decision_maker_verified: isDecisionMaker,\n      luxury_travel_core_verified: strongLuxuryTravelCore,\n      required_fields_complete: requiredFieldsComplete,\n      lead_score: leadScore,\n      lead_grade: leadGrade,\n      fit_score: Math.max(1, Math.round(leadScore / 10)),\n      qualification_status: qualificationStatus,\n      rejection_reasons: uniqueRejectionReasons.join('; '),\n      review_reasons: uniqueReviewReasons.join('; '),\n      fit_notes: positiveSignals.join('; '),\n      company_fit_verified: qualificationStatus === 'Qualified',\n      gpt_summary: gptSummary,\n      sdr_note: sdrNote,\n      assigned_category: 'B2B Luxury Travel',\n      lead_source: 'Apify',\n      added_by: config.added_by ?? 'OpenClaw',\n      date_added: new Date().toISOString().slice(0, 10),\n      next_step:\n        qualificationStatus === 'Qualified'\n          ? 'Check Monday.com and both master sheets for duplicates'\n          : qualificationStatus === 'Needs Review'\n            ? 'Manually verify company type and partnership suitability'\n            : 'Do not add to the sheet',\n    },\n  });\n}\n\n// Deduplicate within batch\nconst bestByPerson = new Map();\n\nfor (const item of reviewedLeads) {\n  const lead = item.json;\n  const linkedIn = normalizeLinkedIn(lead.linkedin);\n  const email = normalizeText(lead.email);\n  const nameCompany = [normalizeText(lead.full_name), normalizeText(lead.company_name)].join('|');\n  const nameTitle = [normalizeText(lead.full_name), normalizeText(lead.job_title)].join('|');\n\n  const personKey = linkedIn\n    ? `linkedin:${linkedIn}`\n    : email\n      ? `email:${email}`\n      : nameCompany !== '|'\n        ? `name-company:${nameCompany}`\n        : `name-title:${nameTitle}`;\n\n  const existing = bestByPerson.get(personKey);\n  if (!existing || Number(lead.lead_score) > Number(existing.json.lead_score)) {\n    bestByPerson.set(personKey, item);\n  }\n}\n\nconst statusPriority = { Qualified: 1, 'Needs Review': 2, Rejected: 3 };\n\nreturn [...bestByPerson.values()].sort((a, b) => {\n  const statusDifference = statusPriority[a.json.qualification_status] - statusPriority[b.json.qualification_status];\n  if (statusDifference !== 0) return statusDifference;\n  return Number(b.json.lead_score) - Number(a.json.lead_score);\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        400
+      ],
+      "id": "e3107b57-16f6-4ad9-a79c-ee724e8676a2",
+      "name": "Review & Score Private Aviation Leads1"
+    },
+    {
+      "parameters": {
+        "url": "={{'https://api.apify.com/v2/datasets/' + $json.data.defaultDatasetId + '/items?clean=true&format=json&limit=' + $('Webhook').first().json.body.count}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1552,
+        400
+      ],
+      "id": "88f5e013-4cf6-4522-a434-fcb95ac5a734",
+      "name": "Get Apify Dataset Items1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd05e579-3c1c-4d91-a159-00e5551144e2",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "SUCCEEDED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1776,
+        400
+      ],
+      "id": "990d0c46-95f0-4486-b5d4-fa5e1548e3fe",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actors/code_crafter~leads-finder/runs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_iO64nuYy2oad9afB9bQnfeU8b3A7KI3FpH2a"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  fetch_count: Math.min(\n    Number($('Webhook').first().json.body.count || 5),\n    50\n  ),\n\n  file_name: \"Neuland B2C Finance\",\n\n  contact_job_title: [\n    \"Founder\",\n    \"Co-Founder\",\n    \"Owner\",\n    \"Founder & CEO\",\n    \"CEO\",\n    \"Chief Executive Officer\",\n    \"President\",\n    \"Managing Partner\",\n    \"Founding Partner\",\n    \"COO\",\n    \"CMO\",\n    \"CTO\"\n  ],\n\n  contact_not_job_title: [\n    \"Sales Representative\",\n    \"Sales Executive\",\n    \"Account Executive\",\n    \"Assistant\",\n    \"Coordinator\",\n    \"Analyst\",\n    \"Associate\",\n    \"Intern\"\n  ],\n\n  seniority_level: [\n    \"founder\",\n    \"owner\",\n    \"c_suite\",\n    \"partner\"\n  ],\n\n  contact_city: [\n    \"new york\"\n  ],\n\n  email_status: [\n    \"validated\",\n    \"unknown\"\n  ],\n\n  company_industry: [\n    \"financial services\",\n    \"banking\",\n    \"investment management\",\n    \"venture capital & private equity\"\n  ],\n\n  company_keywords: [\n    \"financial services\",\n    \"investment management\",\n    \"asset management\",\n    \"wealth management\",\n    \"private equity\",\n    \"venture capital\",\n    \"banking\"\n  ],\n\n  min_revenue: \"10M\",\n  max_revenue: \"100M\"\n} }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2448,
+        400
+      ],
+      "id": "f9e52e0a-7496-45e0-b981-b76cde00b3e1",
+      "name": "Start Apify Leads Finder"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Qualified",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eb70daf5-9a86-443d-be71-cde92a49c974"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Qualified"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c340bd89-9073-434b-86f2-0e43cc9173b1",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "=Needs Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs Review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9d1394c9-54a1-4d50-8190-9c88f05f1aa3",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        384
+      ],
+      "id": "c5376d64-e23e-46b3-a40a-ea6e6ed77ca9",
+      "name": "Route by Qualification Status1"
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\n * INPUT:\n * $input.all() = existing rows from the selected Google Sheet tab.\n *\n * QUALIFIED LEADS:\n * Output 0 of \"Route by Qualification Status\".\n */\n\nconst existingRows = $input\n  .all()\n  .map(item => item.json);\n\nconst qualifiedLeads = $(\n  'Route by Qualification Status'\n)\n  .all(0)\n  .map(item => item.json);\n\n/*\n * Return the first non-empty value found\n * from the supplied possible column names.\n */\n\nfunction getValue(row, possibleNames) {\n  for (const name of possibleNames) {\n    const value = row?.[name];\n\n    if (\n      value !== undefined &&\n      value !== null &&\n      String(value).trim() !== ''\n    ) {\n      return String(value).trim();\n    }\n  }\n\n  return '';\n}\n\n/*\n * Parse the Raw Row Data column when available.\n *\n * Some older sheet rows may have shifted columns,\n * while the correct original values remain inside\n * Raw Row Data as JSON.\n */\n\nfunction parseRawRowData(row) {\n  const possibleNames = [\n    'Raw Row Data',\n    'raw_row_data',\n    'Raw Data',\n    'raw_data',\n    'rawRowData',\n  ];\n\n  for (const name of possibleNames) {\n    const rawValue = row?.[name];\n\n    if (\n      rawValue === undefined ||\n      rawValue === null ||\n      rawValue === ''\n    ) {\n      continue;\n    }\n\n    if (\n      typeof rawValue === 'object' &&\n      !Array.isArray(rawValue)\n    ) {\n      return rawValue;\n    }\n\n    try {\n      const parsed = JSON.parse(\n        String(rawValue)\n      );\n\n      if (\n        parsed &&\n        typeof parsed === 'object' &&\n        !Array.isArray(parsed)\n      ) {\n        return parsed;\n      }\n    } catch {\n      // Invalid Raw Row Data is safely ignored.\n    }\n  }\n\n  return {};\n}\n\n/*\n * Check the normal row first.\n * If the value is missing, check Raw Row Data.\n */\n\nfunction getValueFromBoth(\n  row,\n  rawRow,\n  possibleNames\n) {\n  return (\n    getValue(row, possibleNames) ||\n    getValue(rawRow, possibleNames)\n  );\n}\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/\\s+/g, ' ');\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(\n      /^https?:\\/\\/(www\\.)?/,\n      ''\n    )\n    .replace(/\\/+$/, '');\n}\n\nfunction getFullName(row, rawRow = {}) {\n  const directName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'full_name',\n        'Full Name',\n        'Full name',\n        'Name',\n        'name',\n      ]\n    );\n\n  if (directName) {\n    return normalizeText(\n      directName\n    );\n  }\n\n  const firstName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'first_name',\n        'First name',\n        'First Name',\n        'firstname',\n      ]\n    );\n\n  const lastName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'last_name',\n        'Last Name',\n        'Last name',\n        'lastname',\n      ]\n    );\n\n  return normalizeText(\n    `${firstName} ${lastName}`\n  );\n}\n\nfunction getKeys(row) {\n  const rawRow =\n    parseRawRowData(row);\n\n  const linkedin =\n    normalizeLinkedIn(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'linkedin',\n          'Linkedin',\n          'LinkedIn',\n          'LinkedIn URL',\n          'linkedin_url',\n          'linkedinUrl',\n        ]\n      )\n    );\n\n  const email =\n    normalizeEmail(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'email',\n          'Email',\n          'Email Address',\n          'work_email',\n          'Work Email',\n          'personal_email',\n          'Personal Email',\n        ]\n      )\n    );\n\n  const fullName =\n    getFullName(\n      row,\n      rawRow\n    );\n\n  const company =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'company_name',\n          'company name',\n          'Company Name',\n          'Company',\n          'company',\n        ]\n      )\n    );\n\n  const title =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'job_title',\n          'title',\n          'Title',\n          'Job Title',\n        ]\n      )\n    );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Create lookup sets from all existing\n * Google Sheet rows.\n */\n\nconst existingLinkedIn =\n  new Set();\n\nconst existingEmails =\n  new Set();\n\nconst existingNameCompany =\n  new Set();\n\nconst existingNameTitle =\n  new Set();\n\nfor (const row of existingRows) {\n  const keys = getKeys(row);\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare qualified leads in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\n\nfor (const lead of qualifiedLeads) {\n  const keys = getKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    existingLinkedIn.has(\n      keys.linkedin\n    )\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    existingEmails.has(\n      keys.email\n    )\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    existingNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    existingNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Existing lead:\n   * do not return it.\n   */\n\n  if (duplicateMatchedBy) {\n    continue;\n  }\n\n  /*\n   * Immediately add accepted lead keys\n   * to the lookup sets.\n   *\n   * This also prevents duplicates inside\n   * the current qualified batch.\n   */\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      master_sheet_duplicate:\n        false,\n\n      master_sheet_duplicate_check:\n        'Passed',\n\n      next_step:\n        'Check Monday.com CRM boards for duplicates',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        256
+      ],
+      "id": "cad20551-6fd0-4936-b5d2-77c82adc9d0a",
+      "name": "Remove Master Sheet Duplicates1",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input 0 = Monday items (first connected input)\n// Input 1 = Candidate leads from Remove Master Sheet Duplicates1\n\nconst mondayItems = $input.all(0).map(item => item.json);\nconst candidateLeads = $input.all(1).map(item => item.json);\n\n/*\n * Normalization helpers\n */\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/[’']/g, '')\n    .replace(/[^\\p{L}\\p{N}@.+:/\\-\\s]/gu, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(/^https?:\\/\\/(www\\.)?/, '')\n    .replace(/\\/+$/, '');\n}\n\nfunction normalizeCompany(value) {\n  return normalizeText(value)\n    .replace(\n      /\\b(incorporated|inc|llc|ltd|limited|corp|corporation)\\b/g,\n      ''\n    )\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\n/*\n * Read a Monday column by its visible title.\n *\n * Monday output contains:\n * item.name\n * item.column_values[].column.title\n * item.column_values[].text\n */\n\nfunction getMondayColumn(item, wantedTitles) {\n  const wanted = wantedTitles.map(\n    title => normalizeText(title)\n  );\n\n  const columns = Array.isArray(\n    item.column_values\n  )\n    ? item.column_values\n    : [];\n\n  const match = columns.find(column => {\n    const title = normalizeText(\n      column?.column?.title\n    );\n\n    return wanted.includes(title);\n  });\n\n  if (!match) {\n    return '';\n  }\n\n  if (\n    match.text !== undefined &&\n    match.text !== null &&\n    String(match.text).trim() !== ''\n  ) {\n    return String(match.text).trim();\n  }\n\n  /*\n   * Fallback for columns where Monday puts\n   * the useful information inside \"value\".\n   */\n  if (match.value) {\n    try {\n      const parsed =\n        typeof match.value === 'string'\n          ? JSON.parse(match.value)\n          : match.value;\n\n      return String(\n        parsed?.email ??\n        parsed?.text ??\n        parsed?.url ??\n        parsed?.label ??\n        ''\n      ).trim();\n    } catch {\n      return '';\n    }\n  }\n\n  return '';\n}\n\nfunction getMondayFullName(item) {\n  const firstName = getMondayColumn(\n    item,\n    ['First Name', 'First name']\n  );\n\n  const lastName = getMondayColumn(\n    item,\n    ['Last Name', 'Last name']\n  );\n\n  const combinedName = normalizeText(\n    `${firstName} ${lastName}`\n  );\n\n  /*\n   * Monday item.name is also the lead name,\n   * so use it when First Name/Last Name are empty.\n   */\n  return combinedName ||\n    normalizeText(item.name);\n}\n\nfunction getMondayKeys(item) {\n  const fullName =\n    getMondayFullName(item);\n\n  const linkedin = normalizeLinkedIn(\n    getMondayColumn(item, [\n      'Linkedin',\n      'LinkedIn',\n      'LinkedIn URL',\n    ])\n  );\n\n  const email = normalizeEmail(\n    getMondayColumn(item, [\n      'Email',\n      'Email Address',\n    ])\n  );\n\n  const company = normalizeCompany(\n    getMondayColumn(item, [\n      'Company',\n      'Company Name',\n    ])\n  );\n\n  const title = normalizeText(\n    getMondayColumn(item, [\n      'Title',\n      'Job Title',\n    ])\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\nfunction getCandidateFullName(lead) {\n  const directName = normalizeText(\n    lead.full_name ??\n    lead['Full Name'] ??\n    lead.name\n  );\n\n  if (directName) {\n    return directName;\n  }\n\n  return normalizeText(\n    `${\n      lead.first_name ??\n      lead['First Name'] ??\n      ''\n    } ${\n      lead.last_name ??\n      lead['Last Name'] ??\n      ''\n    }`\n  );\n}\n\nfunction getCandidateKeys(lead) {\n  const fullName =\n    getCandidateFullName(lead);\n\n  const linkedin = normalizeLinkedIn(\n    lead.linkedin ??\n    lead.LinkedIn ??\n    lead.Linkedin ??\n    lead['LinkedIn URL']\n  );\n\n  const email = normalizeEmail(\n    lead.email ??\n    lead.Email ??\n    lead['Email Address']\n  );\n\n  const company = normalizeCompany(\n    lead.company_name ??\n    lead['company name'] ??\n    lead['Company Name'] ??\n    lead.Company\n  );\n\n  const title = normalizeText(\n    lead.job_title ??\n    lead.title ??\n    lead.Title ??\n    lead['Job Title']\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Build lookup sets from all Monday items.\n */\n\nconst mondayLinkedIn = new Set();\nconst mondayEmails = new Set();\nconst mondayNameCompany = new Set();\nconst mondayNameTitle = new Set();\n\nfor (const item of mondayItems) {\n  const keys = getMondayKeys(item);\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\nconst duplicateDetails = [];\n\nfor (const lead of candidateLeads) {\n  const keys = getCandidateKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    mondayLinkedIn.has(keys.linkedin)\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    mondayEmails.has(keys.email)\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    mondayNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    mondayNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Duplicate exists in Monday:\n   * skip it and do not send it to Google Sheets.\n   */\n  if (duplicateMatchedBy) {\n    duplicateDetails.push({\n      full_name:\n        lead.full_name ?? '',\n      company_name:\n        lead.company_name ?? '',\n      matched_by:\n        duplicateMatchedBy,\n    });\n\n    continue;\n  }\n\n  /*\n   * Add accepted leads to the sets immediately.\n   * This also prevents duplicates inside the\n   * current candidate batch.\n   */\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      monday_duplicate: false,\n      monday_duplicate_check:\n        'Passed',\n\n      monday_items_checked:\n        mondayItems.length,\n\n      monday_duplicates_skipped:\n        duplicateDetails.length,\n\n      next_step:\n        'Append to B2B Private Jet Leads sheet',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        544
+      ],
+      "id": "9743e88f-8fda-470b-87ee-c7c41b246fd5",
+      "name": "Remove Monday Duplicates1",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        320
+      ],
+      "id": "5b244927-800d-4b02-b9df-3e4e2b55782a",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "18198302679",
+        "groupId": "group_mkwt6xw8",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        544
+      ],
+      "id": "f38b21b4-8540-4985-968c-308054ad7b5e",
+      "name": "Get items by General Pipeline1",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9661187741",
+        "groupId": "group_mm0mxgx",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        544
+      ],
+      "id": "f03aea5d-3544-492b-bf94-a7e35179b9e9",
+      "name": "Get items by Benjimin Pipeline1",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9782799884",
+        "groupId": "group_mkx1995a",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        544
+      ],
+      "id": "c4707f0c-bdd5-40b4-9bb9-f76140d6cbe1",
+      "name": "Get many by Warm Pipeline1",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fdd396fb-272c-4e13-a8b3-6b58896c3007",
+              "leftValue": "={{ $json.qualification_status }}",
+              "rightValue": "Qualified",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        336
+      ],
+      "id": "e03c27b9-1745-4d34-90a8-7e272dfae4e5",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Get qualified count directly from the sheet append node\nlet actuallyAddedToSheet = 0;\ntry {\n  actuallyAddedToSheet = $('Append or update row in sheet1').all().length || 0;\n} catch (e) {\n  actuallyAddedToSheet = 0;\n}\n\nconst needsReview = items.filter(i => \n  i.json.qualification_status === 'Needs Review'\n);\n\nconst rejected = items.filter(i => \n  i.json.qualification_status === 'Rejected'\n);\n\nconst revenueRejected = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('revenue')\n);\n\nconst wrongIndustry = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('unrelated industry')\n);\n\nconst notAviation = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('no reliable evidence')\n);\n\nreturn [{\n  json: {\n    status: \"complete\",\n    icp: \"Private Aviation\",\n    total_processed: items.length,\n    actually_added_to_sheet: actuallyAddedToSheet,\n    needs_review: needsReview.length,\n    rejected: rejected.length,\n    rejection_breakdown: {\n      revenue_out_of_range: revenueRejected.length,\n      wrong_industry: wrongIndustry.length,\n      not_private_aviation: notAviation.length\n    },\n    sheet_updated: actuallyAddedToSheet > 0 ? \"Yes\" : \"No\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        336
+      ],
+      "id": "8ee0dcc3-81b1-4f47-9584-f488c934a43f",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1136,
+        336
+      ],
+      "id": "3446e0ab-1f1c-4ccd-8994-ef2db74479d2",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get items from BOTH previous nodes by name\nconst sheetItems = $('Remove Master Sheet Duplicates1').all().map(item => item.json);\nconst mondayItems = $('Remove Monday Duplicates1').all().map(item => item.json);\n\n// UNION - combine both arrays and remove only exact duplicates\nconst allItems = [...sheetItems, ...mondayItems];\n\nconst seen = new Set();\nconst union = [];\n\nfor (const lead of allItems) {\n  // Create unique key using email + linkedin + company\n  const email = (lead.email || '').toLowerCase().trim();\n  const linkedin = (lead.linkedin || '').toLowerCase().trim();\n  const company = (lead.company_name || '').toLowerCase().trim();\n  const key = `${email}|${linkedin}|${company}`;\n  \n  if (!seen.has(key)) {\n    seen.add(key);\n    union.push({ json: lead });\n  }\n}\n\nreturn union;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        256
+      ],
+      "id": "21f30daf-a988-4fdb-9cf3-da9151ec8d6f",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2224,
+        880
+      ],
+      "id": "d1349faa-cfd4-495e-8a6b-99158685a5f3",
+      "name": "Wait2",
+      "webhookId": "a739b05d-6d0a-453b-8b36-ed699f579c82"
+    },
+    {
+      "parameters": {
+        "url": "={{\n  'https://api.apify.com/v2/actor-runs/' +\n  $json.data.id +\n  '?waitForFinish=300'\n}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2000,
+        880
+      ],
+      "id": "7091169c-b808-44c4-8278-84c0ab4c7af1",
+      "name": "Check Apify Run Status2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oGQg91DdqrrBk3Xx",
+          "name": "Header Auth account"
+        },
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        736
+      ],
+      "id": "dad06d75-d8a2-481c-b686-8ef289a67d12",
+      "name": "Read Existing B2B Private Jet Leads2",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Webhook').first().json.body ?? {};\n\nconst currentYear = new Date().getUTCFullYear();\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/\\s+/g, ' ');\n}\n\nfunction normalizeLinkedIn(value) {\n  return normalizeText(value)\n    .split('?')[0]\n    .split('#')[0]\n    .replace(/^https?:\\/\\/(www\\.)?linkedin\\.com\\//, 'linkedin.com/')\n    .replace(/\\/+$/, '');\n}\n\nfunction parseRevenue(lead) {\n  const rawRevenue = String(lead.company_annual_revenue ?? '').replace(/[$,\\s]/g, '');\n\n  if (rawRevenue && Number.isFinite(Number(rawRevenue))) {\n    return Number(rawRevenue);\n  }\n\n  const cleanRevenue = String(lead.company_annual_revenue_clean ?? '').trim().toUpperCase();\n  const match = cleanRevenue.match(/^([\\d.]+)\\s*([KMB])?$/);\n\n  if (!match) return NaN;\n\n  const multiplier = { K: 1_000, M: 1_000_000, B: 1_000_000_000 }[match[2]] ?? 1;\n  return Number(match[1]) * multiplier;\n}\n\nfunction uniqueReasons(reasons) {\n  return [...new Set(reasons)];\n}\n\nconst minimumRevenue = Number(config.minimum_revenue ?? 5_000_000);\nconst maximumRevenue = Number(config.maximum_revenue ?? 100_000_000);\nconst maximumEmployees = Number(config.maximum_employees ?? 50);\n\nconst priorityStates = new Set(\n  (config.priority_states ?? ['Colorado', 'Utah', 'California', 'Vermont', 'Wyoming', 'New York', 'Florida']).map(normalizeText)\n);\n\nconst reviewedLeads = [];\n\nfor (const item of $input.all()) {\n  const lead = item.json;\n\n  const rejectionReasons = [];\n  const reviewReasons = [];\n  const positiveSignals = [];\n\n  const title = normalizeText(lead.job_title);\n  const industry = normalizeText(lead.industry);\n  const companyName = String(lead.company_name ?? '').trim();\n  const companyState = String(lead.company_state ?? lead.state ?? '').trim();\n  const country = normalizeText(lead.company_country ?? lead.country);\n  const companySize = Number(lead.company_size);\n  const revenue = parseRevenue(lead);\n  const foundedYear = Number(lead.company_founded_year);\n\n  const companyAge =\n    Number.isFinite(foundedYear) && foundedYear > 1800 && foundedYear <= currentYear\n      ? currentYear - foundedYear\n      : null;\n\n  const primaryCompanyText = [\n    lead.company_name,\n    lead.industry,\n    lead.company_description,\n    lead.headline,\n    lead.company_domain,\n  ].filter(Boolean).join(' ').toLowerCase();\n\n  const keywordText = normalizeText(lead.keywords);\n\n  // Decision-maker check for CONCIERGE\n  const isDecisionMaker = /\\b(founder|co-founder|ceo|chief executive officer|coo|chief operating officer|president|owner|head of concierge|head of client services|head of partnerships|head of travel|supplier relations|managing partner)\\b/i.test(title);\n\n  if (!isDecisionMaker) {\n    rejectionReasons.push(\n      'Contact is not Founder, CEO, COO, President, Head of Concierge, Client Services, Partnerships, Travel, or Supplier Relations'\n    );\n  }\n\n  const excludedTitle = /\\b(junior concierge|coordinator|assistant|specialist|associate|intern)\\b/i.test(title);\n\n  if (excludedTitle && !isDecisionMaker) {\n    rejectionReasons.push('Contact has an excluded or non-decision-making role');\n  }\n\n  // Geography\n  if (!['united states', 'us', 'usa'].includes(country)) {\n    rejectionReasons.push('Company is not based in the United States');\n  }\n\n  // Revenue\n  if (!Number.isFinite(revenue)) {\n    rejectionReasons.push('Company revenue is missing or invalid');\n  } else if (revenue < minimumRevenue || revenue > maximumRevenue) {\n    rejectionReasons.push('Company revenue is outside the required $5M-$100M range');\n  }\n\n  // Employees\n  if (!Number.isFinite(companySize)) {\n    reviewReasons.push('Employee count requires verification');\n  } else if (companySize < 1 || companySize > maximumEmployees) {\n    rejectionReasons.push('Company has more than the maximum 50 employees or has an invalid employee count');\n  }\n\n  // CONCIERGE COMPANY VERIFICATION\n  const strongConciergeCore = /\\b(concierge company|concierge service|concierge business|lifestyle management|private concierge|luxury concierge|personal concierge|vip concierge|member services company|hnw concierge|high-net-worth services|private client services|luxury lifestyle management)\\b/i.test(\n    primaryCompanyText\n  );\n\n  const conciergeIndustry = /\\b(hospitality|leisure, travel|travel & tourism|luxury goods|consumer services|events services|professional services)\\b/i.test(industry);\n\n  const affluentClientSignal = /\\b(affluent|high-net-worth|hnw|luxury|vip|private clients|private families|elite|premium|exclusive|bespoke|ultra-high|wealthy|principals)\\b/i.test(\n    `${primaryCompanyText} ${keywordText}`\n  );\n\n  // Reject if not concierge business\n  if (!strongConciergeCore) {\n    rejectionReasons.push(\n      'No reliable evidence that the company is a concierge, lifestyle management, or member services business'\n    );\n  }\n\n  // Reject unrelated industries\n  const unrelatedIndustry = /\\b(pharmaceuticals|medical practice|health, wellness & fitness|construction|manufacturing|logistics|freight|trucking|railroad|oil|energy|textiles|retail|food & beverages|architecture & planning|design|real estate|public relations|advertising|events services|coffee|beverages)\\b/i.test(industry);\n\n  if (unrelatedIndustry && !strongConciergeCore) {\n    rejectionReasons.push('Company operates in an unrelated industry rather than concierge/lifestyle management');\n  }\n\n  // Positive signals\n  if (strongConciergeCore) positiveSignals.push('Strong concierge/lifestyle-management evidence');\n  if (affluentClientSignal) positiveSignals.push('Affluent client access signal');\n  if (Number.isFinite(revenue) && revenue >= minimumRevenue && revenue <= maximumRevenue) positiveSignals.push('Revenue is within $5M-$100M');\n  if (Number.isFinite(companySize) && companySize >= 1 && companySize <= maximumEmployees) positiveSignals.push('Employee count is within the maximum of 50');\n\n  const isPriorityState = priorityStates.has(normalizeText(companyState));\n  if (isPriorityState) positiveSignals.push('Located in a priority state');\n\n  if (companyAge !== null && companyAge >= 5) positiveSignals.push('Established company');\n\n  // Data completeness\n  const requiredValues = [\n    lead.full_name,\n    lead.linkedin,\n    lead.job_title,\n    lead.company_name,\n    lead.company_domain ?? lead.company_website,\n    country,\n  ];\n\n  const requiredFieldsComplete =\n    requiredValues.every(value => value !== undefined && value !== null && String(value).trim() !== '') &&\n    Number.isFinite(revenue) &&\n    Number.isFinite(companySize);\n\n  if (!requiredFieldsComplete) {\n    reviewReasons.push('One or more required lead fields are missing');\n  }\n\n  // Scoring\n  let leadScore = 0;\n  if (isDecisionMaker) leadScore += 25;\n  if (strongConciergeCore) leadScore += 30;\n  if (affluentClientSignal) leadScore += 10;\n  if (Number.isFinite(revenue) && revenue >= minimumRevenue && revenue <= maximumRevenue) leadScore += 15;\n  if (Number.isFinite(companySize) && companySize >= 1 && companySize <= maximumEmployees) leadScore += 10;\n  leadScore += isPriorityState ? 5 : 2;\n  if (companyAge !== null && companyAge >= 5) leadScore += 5;\n  else if (companyAge !== null) leadScore += 2;\n  if (requiredFieldsComplete) leadScore += 5;\n\n  leadScore = Math.min(100, leadScore);\n\n  const leadGrade = leadScore >= 85 ? 'A' : leadScore >= 70 ? 'B' : 'C';\n\n  const uniqueRejectionReasons = uniqueReasons(rejectionReasons);\n  const uniqueReviewReasons = uniqueReasons(reviewReasons);\n\n  let qualificationStatus;\n  if (uniqueRejectionReasons.length > 0) {\n    qualificationStatus = 'Rejected';\n  } else if (!strongConciergeCore || uniqueReviewReasons.length > 0 || !requiredFieldsComplete || leadGrade !== 'A') {\n    qualificationStatus = 'Needs Review';\n  } else {\n    qualificationStatus = 'Qualified';\n  }\n\n  const estimatedRevenueText = Number.isFinite(revenue) ? `$${(revenue / 1_000_000).toFixed(1)}M` : 'unconfirmed revenue';\n\n  const companyTypeText = strongConciergeCore\n    ? 'concierge/lifestyle-management company'\n    : 'company outside the confirmed concierge ICP';\n\n  const gptSummary =\n    `${lead.full_name ?? 'This contact'} is ${lead.job_title ?? 'a contact'} at ${companyName || 'an unidentified company'}, a ${companyTypeText}. ` +\n    `The company is reported at approximately ${estimatedRevenueText} in revenue with ${Number.isFinite(companySize) ? companySize : 'an unconfirmed number of'} employees. ` +\n    `${\n      qualificationStatus === 'Qualified'\n        ? 'The lead meets the current Neuland Concierge Partnership criteria.'\n        : qualificationStatus === 'Needs Review'\n          ? 'The lead requires manual verification before it can be accepted.'\n          : 'The lead does not meet the current Concierge Partnership criteria.'\n    }`;\n\n  const sdrNote =\n    `Automated concierge candidate from Apify. ` +\n    `Status: ${qualificationStatus}. ` +\n    `${\n      uniqueRejectionReasons.length\n        ? `Reject because: ${uniqueRejectionReasons.join('; ')}.`\n        : uniqueReviewReasons.length\n          ? `Review because: ${uniqueReviewReasons.join('; ')}.`\n          : 'Company and contact match the assigned ICP.'\n    }`;\n\n  reviewedLeads.push({\n    json: {\n      ...lead,\n      revenue_numeric: revenue,\n      company_age: companyAge,\n      priority_state: isPriorityState,\n      decision_maker_verified: isDecisionMaker,\n      concierge_core_verified: strongConciergeCore,\n      required_fields_complete: requiredFieldsComplete,\n      lead_score: leadScore,\n      lead_grade: leadGrade,\n      fit_score: Math.max(1, Math.round(leadScore / 10)),\n      qualification_status: qualificationStatus,\n      rejection_reasons: uniqueRejectionReasons.join('; '),\n      review_reasons: uniqueReviewReasons.join('; '),\n      fit_notes: positiveSignals.join('; '),\n      company_fit_verified: qualificationStatus === 'Qualified',\n      gpt_summary: gptSummary,\n      sdr_note: sdrNote,\n      assigned_category: 'B2B Concierge',\n      lead_source: 'Apify',\n      added_by: config.added_by ?? 'OpenClaw',\n      date_added: new Date().toISOString().slice(0, 10),\n      next_step:\n        qualificationStatus === 'Qualified'\n          ? 'Check Monday.com and both master sheets for duplicates'\n          : qualificationStatus === 'Needs Review'\n            ? 'Manually verify company type and partnership suitability'\n            : 'Do not add to the sheet',\n    },\n  });\n}\n\n// Deduplicate within batch\nconst bestByPerson = new Map();\n\nfor (const item of reviewedLeads) {\n  const lead = item.json;\n  const linkedIn = normalizeLinkedIn(lead.linkedin);\n  const email = normalizeText(lead.email);\n  const nameCompany = [normalizeText(lead.full_name), normalizeText(lead.company_name)].join('|');\n  const nameTitle = [normalizeText(lead.full_name), normalizeText(lead.job_title)].join('|');\n\n  const personKey = linkedIn\n    ? `linkedin:${linkedIn}`\n    : email\n      ? `email:${email}`\n      : nameCompany !== '|'\n        ? `name-company:${nameCompany}`\n        : `name-title:${nameTitle}`;\n\n  const existing = bestByPerson.get(personKey);\n  if (!existing || Number(lead.lead_score) > Number(existing.json.lead_score)) {\n    bestByPerson.set(personKey, item);\n  }\n}\n\nconst statusPriority = { Qualified: 1, 'Needs Review': 2, Rejected: 3 };\n\nreturn [...bestByPerson.values()].sort((a, b) => {\n  const statusDifference = statusPriority[a.json.qualification_status] - statusPriority[b.json.qualification_status];\n  if (statusDifference !== 0) return statusDifference;\n  return Number(b.json.lead_score) - Number(a.json.lead_score);\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        880
+      ],
+      "id": "e561acea-9395-4a4a-a499-212425574c32",
+      "name": "Review & Score Private Aviation Leads2"
+    },
+    {
+      "parameters": {
+        "url": "={{'https://api.apify.com/v2/datasets/' + $json.data.defaultDatasetId + '/items?clean=true&format=json&limit=' + $('Webhook').first().json.body.count}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1552,
+        880
+      ],
+      "id": "2f63d10f-baed-471f-b243-d0d45959e589",
+      "name": "Get Apify Dataset Items2",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "AbwQO9nCRhqwzy7K",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd05e579-3c1c-4d91-a159-00e5551144e2",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "SUCCEEDED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1776,
+        880
+      ],
+      "id": "c8e9f096-f755-4082-b72f-b54752e3f4da",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actors/code_crafter~leads-finder/runs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_iO64nuYy2oad9afB9bQnfeU8b3A7KI3FpH2a"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  fetch_count: Math.min(\n    Number($('Webhook').first().json.body.count || 5),\n    50\n  ),\n\n  file_name: \"Neuland B2C Tech\",\n\n  contact_job_title: [\n    \"Founder\",\n    \"Co-Founder\",\n    \"Owner\",\n    \"Founder & CEO\",\n    \"CEO\",\n    \"Chief Executive Officer\",\n    \"President\",\n    \"Managing Partner\",\n    \"Founding Partner\",\n    \"COO\",\n    \"CMO\",\n    \"CTO\"\n  ],\n\n  contact_not_job_title: [\n    \"Sales Representative\",\n    \"Sales Executive\",\n    \"Account Executive\",\n    \"Assistant\",\n    \"Coordinator\",\n    \"Analyst\",\n    \"Associate\",\n    \"Intern\",\n    \"Software Engineer\",\n    \"Developer\"\n  ],\n\n  seniority_level: [\n    \"founder\",\n    \"owner\",\n    \"c_suite\",\n    \"partner\"\n  ],\n\n  contact_city: [\n    \"san francisco\"\n  ],\n\n  email_status: [\n    \"validated\",\n    \"unknown\"\n  ],\n\n  company_industry: [\n    \"computer software\",\n    \"information technology & services\",\n    \"internet\"\n  ],\n\n  company_keywords: [\n    \"software\",\n    \"saas\",\n    \"technology\",\n    \"artificial intelligence\",\n    \"cybersecurity\",\n    \"cloud software\",\n    \"blockchain\",\n    \"cryptocurrency\"\n  ],\n\n  min_revenue: \"10M\",\n  max_revenue: \"100M\"\n} }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2448,
+        880
+      ],
+      "id": "cdccf364-6450-4ba1-af26-b55cbc917ab4",
+      "name": "Start Apify Leads Finder1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Qualified",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eb70daf5-9a86-443d-be71-cde92a49c974"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Qualified"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c340bd89-9073-434b-86f2-0e43cc9173b1",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "=Needs Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Needs Review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9d1394c9-54a1-4d50-8190-9c88f05f1aa3",
+                    "leftValue": "={{ $json.qualification_status }}",
+                    "rightValue": "Rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        864
+      ],
+      "id": "bd0d54ee-72b2-432d-971f-8a6482ab3289",
+      "name": "Route by Qualification Status2"
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\n * INPUT:\n * $input.all() = existing rows from the selected Google Sheet tab.\n *\n * QUALIFIED LEADS:\n * Output 0 of \"Route by Qualification Status\".\n */\n\nconst existingRows = $input\n  .all()\n  .map(item => item.json);\n\nconst qualifiedLeads = $(\n  'Route by Qualification Status'\n)\n  .all(0)\n  .map(item => item.json);\n\n/*\n * Return the first non-empty value found\n * from the supplied possible column names.\n */\n\nfunction getValue(row, possibleNames) {\n  for (const name of possibleNames) {\n    const value = row?.[name];\n\n    if (\n      value !== undefined &&\n      value !== null &&\n      String(value).trim() !== ''\n    ) {\n      return String(value).trim();\n    }\n  }\n\n  return '';\n}\n\n/*\n * Parse the Raw Row Data column when available.\n *\n * Some older sheet rows may have shifted columns,\n * while the correct original values remain inside\n * Raw Row Data as JSON.\n */\n\nfunction parseRawRowData(row) {\n  const possibleNames = [\n    'Raw Row Data',\n    'raw_row_data',\n    'Raw Data',\n    'raw_data',\n    'rawRowData',\n  ];\n\n  for (const name of possibleNames) {\n    const rawValue = row?.[name];\n\n    if (\n      rawValue === undefined ||\n      rawValue === null ||\n      rawValue === ''\n    ) {\n      continue;\n    }\n\n    if (\n      typeof rawValue === 'object' &&\n      !Array.isArray(rawValue)\n    ) {\n      return rawValue;\n    }\n\n    try {\n      const parsed = JSON.parse(\n        String(rawValue)\n      );\n\n      if (\n        parsed &&\n        typeof parsed === 'object' &&\n        !Array.isArray(parsed)\n      ) {\n        return parsed;\n      }\n    } catch {\n      // Invalid Raw Row Data is safely ignored.\n    }\n  }\n\n  return {};\n}\n\n/*\n * Check the normal row first.\n * If the value is missing, check Raw Row Data.\n */\n\nfunction getValueFromBoth(\n  row,\n  rawRow,\n  possibleNames\n) {\n  return (\n    getValue(row, possibleNames) ||\n    getValue(rawRow, possibleNames)\n  );\n}\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/\\s+/g, ' ');\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(\n      /^https?:\\/\\/(www\\.)?/,\n      ''\n    )\n    .replace(/\\/+$/, '');\n}\n\nfunction getFullName(row, rawRow = {}) {\n  const directName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'full_name',\n        'Full Name',\n        'Full name',\n        'Name',\n        'name',\n      ]\n    );\n\n  if (directName) {\n    return normalizeText(\n      directName\n    );\n  }\n\n  const firstName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'first_name',\n        'First name',\n        'First Name',\n        'firstname',\n      ]\n    );\n\n  const lastName =\n    getValueFromBoth(\n      row,\n      rawRow,\n      [\n        'last_name',\n        'Last Name',\n        'Last name',\n        'lastname',\n      ]\n    );\n\n  return normalizeText(\n    `${firstName} ${lastName}`\n  );\n}\n\nfunction getKeys(row) {\n  const rawRow =\n    parseRawRowData(row);\n\n  const linkedin =\n    normalizeLinkedIn(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'linkedin',\n          'Linkedin',\n          'LinkedIn',\n          'LinkedIn URL',\n          'linkedin_url',\n          'linkedinUrl',\n        ]\n      )\n    );\n\n  const email =\n    normalizeEmail(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'email',\n          'Email',\n          'Email Address',\n          'work_email',\n          'Work Email',\n          'personal_email',\n          'Personal Email',\n        ]\n      )\n    );\n\n  const fullName =\n    getFullName(\n      row,\n      rawRow\n    );\n\n  const company =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'company_name',\n          'company name',\n          'Company Name',\n          'Company',\n          'company',\n        ]\n      )\n    );\n\n  const title =\n    normalizeText(\n      getValueFromBoth(\n        row,\n        rawRow,\n        [\n          'job_title',\n          'title',\n          'Title',\n          'Job Title',\n        ]\n      )\n    );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Create lookup sets from all existing\n * Google Sheet rows.\n */\n\nconst existingLinkedIn =\n  new Set();\n\nconst existingEmails =\n  new Set();\n\nconst existingNameCompany =\n  new Set();\n\nconst existingNameTitle =\n  new Set();\n\nfor (const row of existingRows) {\n  const keys = getKeys(row);\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare qualified leads in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\n\nfor (const lead of qualifiedLeads) {\n  const keys = getKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    existingLinkedIn.has(\n      keys.linkedin\n    )\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    existingEmails.has(\n      keys.email\n    )\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    existingNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    existingNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Existing lead:\n   * do not return it.\n   */\n\n  if (duplicateMatchedBy) {\n    continue;\n  }\n\n  /*\n   * Immediately add accepted lead keys\n   * to the lookup sets.\n   *\n   * This also prevents duplicates inside\n   * the current qualified batch.\n   */\n\n  if (keys.linkedin) {\n    existingLinkedIn.add(\n      keys.linkedin\n    );\n  }\n\n  if (keys.email) {\n    existingEmails.add(\n      keys.email\n    );\n  }\n\n  if (keys.nameCompany) {\n    existingNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    existingNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      master_sheet_duplicate:\n        false,\n\n      master_sheet_duplicate_check:\n        'Passed',\n\n      next_step:\n        'Check Monday.com CRM boards for duplicates',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        736
+      ],
+      "id": "584afaf6-b816-498d-929e-f5eadd395f56",
+      "name": "Remove Master Sheet Duplicates2",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input 0 = Monday items (first connected input)\n// Input 1 = Candidate leads from Remove Master Sheet Duplicates1\n\nconst mondayItems = $input.all(0).map(item => item.json);\nconst candidateLeads = $input.all(1).map(item => item.json);\n\n/*\n * Normalization helpers\n */\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/[’']/g, '')\n    .replace(/[^\\p{L}\\p{N}@.+:/\\-\\s]/gu, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\nfunction normalizeEmail(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase();\n}\n\nfunction normalizeLinkedIn(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .split('?')[0]\n    .split('#')[0]\n    .replace(/^https?:\\/\\/(www\\.)?/, '')\n    .replace(/\\/+$/, '');\n}\n\nfunction normalizeCompany(value) {\n  return normalizeText(value)\n    .replace(\n      /\\b(incorporated|inc|llc|ltd|limited|corp|corporation)\\b/g,\n      ''\n    )\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\n/*\n * Read a Monday column by its visible title.\n *\n * Monday output contains:\n * item.name\n * item.column_values[].column.title\n * item.column_values[].text\n */\n\nfunction getMondayColumn(item, wantedTitles) {\n  const wanted = wantedTitles.map(\n    title => normalizeText(title)\n  );\n\n  const columns = Array.isArray(\n    item.column_values\n  )\n    ? item.column_values\n    : [];\n\n  const match = columns.find(column => {\n    const title = normalizeText(\n      column?.column?.title\n    );\n\n    return wanted.includes(title);\n  });\n\n  if (!match) {\n    return '';\n  }\n\n  if (\n    match.text !== undefined &&\n    match.text !== null &&\n    String(match.text).trim() !== ''\n  ) {\n    return String(match.text).trim();\n  }\n\n  /*\n   * Fallback for columns where Monday puts\n   * the useful information inside \"value\".\n   */\n  if (match.value) {\n    try {\n      const parsed =\n        typeof match.value === 'string'\n          ? JSON.parse(match.value)\n          : match.value;\n\n      return String(\n        parsed?.email ??\n        parsed?.text ??\n        parsed?.url ??\n        parsed?.label ??\n        ''\n      ).trim();\n    } catch {\n      return '';\n    }\n  }\n\n  return '';\n}\n\nfunction getMondayFullName(item) {\n  const firstName = getMondayColumn(\n    item,\n    ['First Name', 'First name']\n  );\n\n  const lastName = getMondayColumn(\n    item,\n    ['Last Name', 'Last name']\n  );\n\n  const combinedName = normalizeText(\n    `${firstName} ${lastName}`\n  );\n\n  /*\n   * Monday item.name is also the lead name,\n   * so use it when First Name/Last Name are empty.\n   */\n  return combinedName ||\n    normalizeText(item.name);\n}\n\nfunction getMondayKeys(item) {\n  const fullName =\n    getMondayFullName(item);\n\n  const linkedin = normalizeLinkedIn(\n    getMondayColumn(item, [\n      'Linkedin',\n      'LinkedIn',\n      'LinkedIn URL',\n    ])\n  );\n\n  const email = normalizeEmail(\n    getMondayColumn(item, [\n      'Email',\n      'Email Address',\n    ])\n  );\n\n  const company = normalizeCompany(\n    getMondayColumn(item, [\n      'Company',\n      'Company Name',\n    ])\n  );\n\n  const title = normalizeText(\n    getMondayColumn(item, [\n      'Title',\n      'Job Title',\n    ])\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\nfunction getCandidateFullName(lead) {\n  const directName = normalizeText(\n    lead.full_name ??\n    lead['Full Name'] ??\n    lead.name\n  );\n\n  if (directName) {\n    return directName;\n  }\n\n  return normalizeText(\n    `${\n      lead.first_name ??\n      lead['First Name'] ??\n      ''\n    } ${\n      lead.last_name ??\n      lead['Last Name'] ??\n      ''\n    }`\n  );\n}\n\nfunction getCandidateKeys(lead) {\n  const fullName =\n    getCandidateFullName(lead);\n\n  const linkedin = normalizeLinkedIn(\n    lead.linkedin ??\n    lead.LinkedIn ??\n    lead.Linkedin ??\n    lead['LinkedIn URL']\n  );\n\n  const email = normalizeEmail(\n    lead.email ??\n    lead.Email ??\n    lead['Email Address']\n  );\n\n  const company = normalizeCompany(\n    lead.company_name ??\n    lead['company name'] ??\n    lead['Company Name'] ??\n    lead.Company\n  );\n\n  const title = normalizeText(\n    lead.job_title ??\n    lead.title ??\n    lead.Title ??\n    lead['Job Title']\n  );\n\n  return {\n    linkedin,\n    email,\n\n    nameCompany:\n      fullName && company\n        ? `${fullName}|${company}`\n        : '',\n\n    nameTitle:\n      fullName && title\n        ? `${fullName}|${title}`\n        : '',\n  };\n}\n\n/*\n * Build lookup sets from all Monday items.\n */\n\nconst mondayLinkedIn = new Set();\nconst mondayEmails = new Set();\nconst mondayNameCompany = new Set();\nconst mondayNameTitle = new Set();\n\nfor (const item of mondayItems) {\n  const keys = getMondayKeys(item);\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n}\n\n/*\n * Compare in the required order:\n *\n * 1. LinkedIn URL\n * 2. Email\n * 3. Full name + company\n * 4. Full name + title\n */\n\nconst newLeads = [];\nconst duplicateDetails = [];\n\nfor (const lead of candidateLeads) {\n  const keys = getCandidateKeys(lead);\n\n  let duplicateMatchedBy = '';\n\n  if (\n    keys.linkedin &&\n    mondayLinkedIn.has(keys.linkedin)\n  ) {\n    duplicateMatchedBy =\n      'LinkedIn URL';\n  } else if (\n    keys.email &&\n    mondayEmails.has(keys.email)\n  ) {\n    duplicateMatchedBy =\n      'Email';\n  } else if (\n    keys.nameCompany &&\n    mondayNameCompany.has(\n      keys.nameCompany\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and company';\n  } else if (\n    keys.nameTitle &&\n    mondayNameTitle.has(\n      keys.nameTitle\n    )\n  ) {\n    duplicateMatchedBy =\n      'Full name and title';\n  }\n\n  /*\n   * Duplicate exists in Monday:\n   * skip it and do not send it to Google Sheets.\n   */\n  if (duplicateMatchedBy) {\n    duplicateDetails.push({\n      full_name:\n        lead.full_name ?? '',\n      company_name:\n        lead.company_name ?? '',\n      matched_by:\n        duplicateMatchedBy,\n    });\n\n    continue;\n  }\n\n  /*\n   * Add accepted leads to the sets immediately.\n   * This also prevents duplicates inside the\n   * current candidate batch.\n   */\n\n  if (keys.linkedin) {\n    mondayLinkedIn.add(keys.linkedin);\n  }\n\n  if (keys.email) {\n    mondayEmails.add(keys.email);\n  }\n\n  if (keys.nameCompany) {\n    mondayNameCompany.add(\n      keys.nameCompany\n    );\n  }\n\n  if (keys.nameTitle) {\n    mondayNameTitle.add(\n      keys.nameTitle\n    );\n  }\n\n  newLeads.push({\n    json: {\n      ...lead,\n\n      monday_duplicate: false,\n      monday_duplicate_check:\n        'Passed',\n\n      monday_items_checked:\n        mondayItems.length,\n\n      monday_duplicates_skipped:\n        duplicateDetails.length,\n\n      next_step:\n        'Append to B2B Private Jet Leads sheet',\n    },\n  });\n}\n\nreturn newLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        1024
+      ],
+      "id": "dc52d630-11f4-41dd-b56b-82c05880304e",
+      "name": "Remove Monday Duplicates2",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        800
+      ],
+      "id": "65efc219-a9df-42bc-b8d2-6d2160dab476",
+      "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "18198302679",
+        "groupId": "group_mkwt6xw8",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        1024
+      ],
+      "id": "9d03e3cd-ac88-4c5b-b14e-bc98deb550ba",
+      "name": "Get items by General Pipeline2",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9661187741",
+        "groupId": "group_mm0mxgx",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        1024
+      ],
+      "id": "849ea313-2706-4585-a9fd-a952601b8607",
+      "name": "Get items by Benjimin Pipeline2",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getAll",
+        "boardId": "9782799884",
+        "groupId": "group_mkx1995a",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        1024
+      ],
+      "id": "3338888b-d316-470f-bbd0-c1a1ea4a0bf2",
+      "name": "Get many by Warm Pipeline2",
+      "executeOnce": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fdd396fb-272c-4e13-a8b3-6b58896c3007",
+              "leftValue": "={{ $json.qualification_status }}",
+              "rightValue": "Qualified",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        816
+      ],
+      "id": "84923a6f-2547-442a-93cc-217c1c5f2aa7",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Get qualified count directly from the sheet append node\nlet actuallyAddedToSheet = 0;\ntry {\n  actuallyAddedToSheet = $('Append or update row in sheet2').all().length || 0;\n} catch (e) {\n  actuallyAddedToSheet = 0;\n}\n\nconst needsReview = items.filter(i => \n  i.json.qualification_status === 'Needs Review'\n);\n\nconst rejected = items.filter(i => \n  i.json.qualification_status === 'Rejected'\n);\n\nconst revenueRejected = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('revenue')\n);\n\nconst wrongIndustry = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('unrelated industry')\n);\n\nconst notAviation = rejected.filter(i =>\n  (i.json.rejection_reasons || '').toLowerCase().includes('no reliable evidence')\n);\n\nreturn [{\n  json: {\n    status: \"complete\",\n    icp: \"Private Aviation\",\n    total_processed: items.length,\n    actually_added_to_sheet: actuallyAddedToSheet,\n    needs_review: needsReview.length,\n    rejected: rejected.length,\n    rejection_breakdown: {\n      revenue_out_of_range: revenueRejected.length,\n      wrong_industry: wrongIndustry.length,\n      not_private_aviation: notAviation.length\n    },\n    sheet_updated: actuallyAddedToSheet > 0 ? \"Yes\" : \"No\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        816
+      ],
+      "id": "ef7834c6-53a0-45ce-95bb-d407eb2b38ef",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1136,
+        816
+      ],
+      "id": "e7e72c08-453a-4f50-8343-9c0d08234371",
+      "name": "Merge5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get items from BOTH previous nodes by name\nconst sheetItems = $('Remove Master Sheet Duplicates2').all().map(item => item.json);\nconst mondayItems = $('Remove Monday Duplicates2').all().map(item => item.json);\n\n// UNION - combine both arrays and remove only exact duplicates\nconst allItems = [...sheetItems, ...mondayItems];\n\nconst seen = new Set();\nconst union = [];\n\nfor (const lead of allItems) {\n  // Create unique key using email + linkedin + company\n  const email = (lead.email || '').toLowerCase().trim();\n  const linkedin = (lead.linkedin || '').toLowerCase().trim();\n  const company = (lead.company_name || '').toLowerCase().trim();\n  const key = `${email}|${linkedin}|${company}`;\n  \n  if (!seen.has(key)) {\n    seen.add(key);\n    union.push({ json: lead });\n  }\n}\n\nreturn union;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        736
+      ],
+      "id": "62ba2051-ad23-456c-a7da-b26b0de5e2f8",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.email }}",
+            "Date/Year": "={{ $now }}",
+            "Full Name": "={{ $json.full_name }}",
+            "First Name": "={{ $json.first_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "LinkedIn URL": "={{ $json.linkedin }}",
+            "Title": "={{ $json.job_title }}",
+            "Company": "={{ $json.company_name }}",
+            "Website / Domain": "={{ $json.company_website }}",
+            "Company LinkedIn": "={{ $json.company_linkedin }}",
+            "Industry": "={{ $json.industry }}",
+            "Location / City": "={{ $json.city }}",
+            "State": "={{ $json.state }}",
+            "Revenue": "={{ $json.company_annual_revenue_clean }}",
+            "Employee Count": "={{ $json.company_size }}",
+            "Status": "New Lead",
+            "Next Step": "Ready",
+            "Notes": "={{ $json.sdr_note }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        -224
+      ],
+      "id": "67a997a9-98bc-4374-9f6d-620be5273cec",
+      "name": "Append or update row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Webhook').first().json.body ?? {};\n\n/*\n * Helpers\n */\n\nfunction normalizeText(value) {\n  return String(value ?? '')\n    .trim()\n    .toLowerCase()\n    .replace(/&/g, ' and ')\n    .replace(/\\s+/g, ' ');\n}\n\nfunction normalizeLinkedIn(value) {\n  return normalizeText(value)\n    .split('?')[0]\n    .split('#')[0]\n    .replace(\n      /^https?:\\/\\/(www\\.)?linkedin\\.com\\//,\n      'linkedin.com/'\n    )\n    .replace(/\\/+$/, '');\n}\n\nfunction parseRevenue(lead) {\n  const rawRevenue = String(\n    lead.company_annual_revenue ?? ''\n  ).replace(/[$,\\s]/g, '');\n\n  if (\n    rawRevenue &&\n    Number.isFinite(Number(rawRevenue))\n  ) {\n    return Number(rawRevenue);\n  }\n\n  const cleanRevenue = String(\n    lead.company_annual_revenue_clean ?? ''\n  )\n    .trim()\n    .toUpperCase()\n    .replace(/[$,\\s]/g, '');\n\n  const match = cleanRevenue.match(\n    /^([\\d.]+)([KMB])?$/\n  );\n\n  if (!match) {\n    return NaN;\n  }\n\n  const multiplier = {\n    K: 1_000,\n    M: 1_000_000,\n    B: 1_000_000_000,\n  }[match[2]] ?? 1;\n\n  return Number(match[1]) * multiplier;\n}\n\nfunction unique(values) {\n  return [\n    ...new Set(\n      values.filter(Boolean)\n    ),\n  ];\n}\n\nfunction hasValue(value) {\n  return (\n    value !== undefined &&\n    value !== null &&\n    String(value).trim() !== ''\n  );\n}\n\n/*\n * Resolve the B2C route sent by OpenClaw.\n */\n\nconst rawIcp = normalizeText(\n  config.icp ??\n  config.category ??\n  'general'\n).replace(/[\\s-]+/g, '_');\n\nconst icpAliases = {\n  realestate: 'real_estate',\n  property: 'real_estate',\n  property_development: 'real_estate',\n\n  financial_services: 'finance',\n  banking: 'finance',\n  investment_management: 'finance',\n  private_equity: 'finance',\n  venture_capital: 'finance',\n\n  technology: 'tech',\n  software: 'tech',\n  saas: 'tech',\n  crypto: 'tech',\n  cryptocurrency: 'tech',\n};\n\nconst requestedIcp =\n  icpAliases[rawIcp] ??\n  rawIcp;\n\nconst minimumRevenue = Number(\n  config.minimum_revenue ??\n  20_000_000\n);\n\nconst maximumRevenue = Number(\n  config.maximum_revenue ??\n  100_000_000\n);\n\n/*\n * Approved B2C geographies.\n */\n\nconst skiStates = new Set([\n  'colorado',\n  'california',\n  'utah',\n  'montana',\n  'wyoming',\n  'washington',\n]);\n\nconst majorCities = new Set([\n  'new york',\n  'new york city',\n  'miami',\n  'san francisco',\n  'los angeles',\n  'austin',\n  'dallas',\n]);\n\n/*\n * Industry rules for all three B2C paths.\n */\n\nconst industryRules = {\n  real_estate: {\n    label: 'B2C Real Estate',\n\n    exact:\n      /\\b(real estate|property development|commercial property|commercial real estate|real estate investment|real estate development)\\b/i,\n\n    adjacent:\n      /\\b(property management|corporate housing|home inspection|relocation|mortgage|construction|architecture|brokerage|realtor|housing services)\\b/i,\n  },\n\n  finance: {\n    label: 'B2C Finance',\n\n    exact:\n      /\\b(finance|financial services?|banking|investment management|asset management|wealth management|private equity|venture capital|fintech|investment firm|capital management)\\b/i,\n\n    adjacent:\n      /\\b(insurance|accounting|tax|mortgage|lending|payments?|credit)\\b/i,\n  },\n\n  tech: {\n    label: 'B2C Tech',\n\n    exact:\n      /\\b(technology|software|saas|computer software|information technology|it services|internet|artificial intelligence|ai|cybersecurity|blockchain|crypto|cryptocurrency|cloud computing)\\b/i,\n\n    adjacent:\n      /\\b(digital agency|consulting|telecommunications|electronics|data services)\\b/i,\n  },\n\n  general: {\n    label: 'B2C Executive General',\n    exact:\n      /\\b(professional services|business services)\\b/i,\n    adjacent: /.*/i,\n  },\n};\n\nconst rule =\n  industryRules[requestedIcp] ??\n  industryRules.general;\n\nconst reviewedLeads = [];\n\n/*\n * Review every lead returned by Apify.\n */\n\nfor (const item of $input.all()) {\n  const lead = item.json ?? {};\n\n  const rejectionReasons = [];\n  const reviewReasons = [];\n  const positiveSignals = [];\n  const missingInformation = [];\n\n  const title = normalizeText(\n    lead.job_title\n  );\n\n  const seniority = normalizeText(\n    lead.seniority_level\n  );\n\n  const functionalLevel =\n    normalizeText(\n      lead.functional_level\n    );\n\n  const industry = normalizeText(\n    lead.industry\n  );\n\n  const companyName = String(\n    lead.company_name ?? ''\n  ).trim();\n\n  /*\n   * For B2C, contact location is more important\n   * than headquarters location.\n   */\n\n  const personCity = String(\n    lead.city ??\n    lead.company_city ??\n    ''\n  ).trim();\n\n  const personState = String(\n    lead.state ??\n    lead.company_state ??\n    ''\n  ).trim();\n\n  const country = normalizeText(\n    lead.country ??\n    lead.company_country\n  );\n\n  const isUS = [\n    'united states',\n    'us',\n    'usa',\n  ].includes(country);\n\n  const companySize = Number(\n    lead.company_size\n  );\n\n  const revenue =\n    parseRevenue(lead);\n\n  const primaryCompanyText = [\n    lead.company_name,\n    lead.industry,\n    lead.company_description,\n    lead.headline,\n    lead.company_domain,\n  ]\n    .filter(Boolean)\n    .join(' ')\n    .toLowerCase();\n\n  const allPublicText = [\n    primaryCompanyText,\n    lead.keywords,\n  ]\n    .filter(Boolean)\n    .join(' ')\n    .toLowerCase();\n\n  /*\n   * Target-title and ownership checks.\n   */\n\n  const founderOwnerTitle =\n    /\\b(founder|co[- ]?founder|owner|founding partner|managing partner|principal)\\b/i.test(\n      title\n    );\n\n  const executiveTitle =\n    /\\b(ceo|chief executive officer|president|coo|chief operating officer|cmo|chief marketing officer|cto|chief technology officer|investor|philanthropist|board member|chair|chairman|chairwoman)\\b/i.test(\n      title\n    );\n\n  const targetTitle =\n    founderOwnerTitle ||\n    executiveTitle;\n\n  const ownershipEvidence =\n    founderOwnerTitle ||\n    /\\b(founder|owner|partner)\\b/i.test(\n      seniority\n    ) ||\n    /\\b(founder|co[- ]?founder|owner|equity partner|principal)\\b/i.test(\n      normalizeText(\n        lead.headline\n      )\n    );\n\n  const excludedTitle =\n    /\\b(sales representative|sales rep|sales executive|account executive|assistant|coordinator|analyst|associate|intern|realtor|real estate agent|broker|advisor|consultant|manager)\\b/i.test(\n      title\n    );\n\n  if (!targetTitle) {\n    rejectionReasons.push(\n      'Contact does not hold an approved B2C founder, owner, partner, or senior executive title'\n    );\n  }\n\n  if (\n    excludedTitle &&\n    !founderOwnerTitle &&\n    !executiveTitle\n  ) {\n    rejectionReasons.push(\n      'Contact has a junior, sales, advisory, or non-owner role'\n    );\n  }\n\n  /*\n   * Generic C-suite alone is not enough.\n   */\n\n  if (\n    targetTitle &&\n    !ownershipEvidence\n  ) {\n    reviewReasons.push(\n      'Senior title is present, but ownership, equity, or personal wealth evidence is not confirmed'\n    );\n  }\n\n  /*\n   * Country and revenue checks.\n   */\n\n  if (!isUS) {\n    rejectionReasons.push(\n      'Lead is not located in the United States'\n    );\n  }\n\n  if (!Number.isFinite(revenue)) {\n    reviewReasons.push(\n      'Company revenue is missing or cannot be verified'\n    );\n\n    missingInformation.push(\n      'Company revenue'\n    );\n  } else if (\n    revenue < minimumRevenue ||\n    revenue > maximumRevenue\n  ) {\n    rejectionReasons.push(\n      'Company revenue is outside the required $20M-$100M range'\n    );\n  }\n\n  /*\n   * B2C has no fixed maximum employee rule,\n   * but headcount is still scored.\n   */\n\n  if (\n    !Number.isFinite(companySize) ||\n    companySize <= 0\n  ) {\n    reviewReasons.push(\n      'Employee headcount is missing or invalid'\n    );\n\n    missingInformation.push(\n      'Employee headcount'\n    );\n  } else if (\n    companySize > 1000\n  ) {\n    reviewReasons.push(\n      'Company appears very large; verify that the person is an owner-led prospect without a full internal support team'\n    );\n  }\n\n  /*\n   * Industry qualification.\n   */\n\n  const exactIndustryMatch =\n    rule.exact.test(industry) ||\n    rule.exact.test(\n      primaryCompanyText\n    );\n\n  const adjacentIndustryMatch =\n    !exactIndustryMatch &&\n    rule.adjacent.test(\n      allPublicText\n    );\n\n  if (\n    !exactIndustryMatch &&\n    !adjacentIndustryMatch\n  ) {\n    rejectionReasons.push(\n      `Company does not match the requested ${rule.label} industry`\n    );\n  } else if (\n    adjacentIndustryMatch\n  ) {\n    reviewReasons.push(\n      `Company appears adjacent to ${rule.label}; verify that it matches the assigned ICP`\n    );\n  }\n\n  /*\n   * Real-estate service providers may appear\n   * in a real-estate search but are not always\n   * genuine property investors/developers.\n   */\n\n  const ancillaryRealEstateService =\n    requestedIcp ===\n      'real_estate' &&\n    /\\b(home inspection|inspection company|realtor network|franchise network|corporate housing|relocation services|property maintenance)\\b/i.test(\n      primaryCompanyText\n    );\n\n  if (\n    ancillaryRealEstateService\n  ) {\n    reviewReasons.push(\n      'Company is an adjacent real-estate service rather than a clear property owner, developer, or investment business'\n    );\n  }\n\n  /*\n   * Geography.\n   */\n\n  const normalizedState =\n    normalizeText(personState);\n\n  const normalizedCity =\n    normalizeText(personCity);\n\n  const isSkiState =\n    skiStates.has(\n      normalizedState\n    );\n\n  const isMajorCity =\n    majorCities.has(\n      normalizedCity\n    );\n\n  const approvedLocation =\n    isSkiState ||\n    isMajorCity;\n\n  if (\n    !approvedLocation &&\n    isUS\n  ) {\n    reviewReasons.push(\n      'Location is in the US but outside the named ski states and major affluent cities'\n    );\n  }\n\n  /*\n   * Public fit signals.\n   * Missing evidence is not treated as a negative fact.\n   */\n\n  const skiSignal =\n    /\\b(ski|skiing|winter travel|snow sports?|alpine)\\b/i.test(\n      allPublicText\n    );\n\n  const familyTravelSignal =\n    /\\b(family travel|family vacation|family trips?|travel with family)\\b/i.test(\n      allPublicText\n    );\n\n  const luxurySignal =\n    /\\b(luxury travel|private club|high[- ]?net[- ]?worth|hnw|private clients?|concierge|executive travel)\\b/i.test(\n      allPublicText\n    );\n\n  if (ownershipEvidence) {\n    positiveSignals.push(\n      'Founder, owner, partner, or equity signal'\n    );\n  }\n\n  if (\n    Number.isFinite(revenue) &&\n    revenue >= minimumRevenue &&\n    revenue <= maximumRevenue\n  ) {\n    positiveSignals.push(\n      'Revenue is within $20M-$100M'\n    );\n  }\n\n  if (approvedLocation) {\n    positiveSignals.push(\n      'Located in an approved ski state or affluent market'\n    );\n  }\n\n  if (exactIndustryMatch) {\n    positiveSignals.push(\n      `Exact ${rule.label} industry match`\n    );\n  }\n\n  if (skiSignal) {\n    positiveSignals.push(\n      'Public ski or winter-travel signal'\n    );\n  }\n\n  if (familyTravelSignal) {\n    positiveSignals.push(\n      'Public family-travel signal'\n    );\n  }\n\n  if (luxurySignal) {\n    positiveSignals.push(\n      'Public luxury, HNW, private-client, or concierge signal'\n    );\n  }\n\n  /*\n   * Required fields.\n   */\n\n  const requiredFields = {\n    'Full name':\n      lead.full_name,\n\n    'LinkedIn URL':\n      lead.linkedin,\n\n    'Job title':\n      lead.job_title,\n\n    'Company name':\n      lead.company_name,\n\n    'Company website/domain':\n      lead.company_domain ??\n      lead.company_website,\n\n    Location:\n      personCity ||\n      personState,\n  };\n\n  for (\n    const [fieldName, value]\n    of Object.entries(\n      requiredFields\n    )\n  ) {\n    if (!hasValue(value)) {\n      missingInformation.push(\n        fieldName\n      );\n    }\n  }\n\n  const requiredFieldsComplete =\n    Object.values(\n      requiredFields\n    ).every(hasValue);\n\n  if (!requiredFieldsComplete) {\n    reviewReasons.push(\n      'One or more required identity, company, or location fields are missing'\n    );\n  }\n\n  /*\n   * Existing B2C sheet scoring structure:\n   *\n   * Title:       20\n   * Seniority:    7.5\n   * Revenue:     12.5\n   * Headcount:    7.5\n   * Location:    10\n   * Industry:     7.5\n   *\n   * Maximum raw points: 65\n   * Raw points are normalized to 100.\n   */\n\n  let scoreTitle = 0;\n\n  if (founderOwnerTitle) {\n    scoreTitle = 20;\n  } else if (\n    /\\b(ceo|chief executive officer|president)\\b/i.test(\n      title\n    )\n  ) {\n    scoreTitle = 17.5;\n  } else if (\n    /\\b(coo|chief operating officer|cmo|chief marketing officer|cto|chief technology officer|investor|philanthropist|board member|chair|chairman|chairwoman)\\b/i.test(\n      title\n    )\n  ) {\n    scoreTitle = 15;\n  }\n\n  let scoreSeniority = 0;\n\n  if (ownershipEvidence) {\n    scoreSeniority = 7.5;\n  } else if (\n    seniority === 'c_suite' ||\n    functionalLevel ===\n      'c_suite' ||\n    executiveTitle\n  ) {\n    scoreSeniority = 5;\n  } else if (\n    seniority === 'director' ||\n    seniority === 'vp' ||\n    seniority === 'head'\n  ) {\n    scoreSeniority = 2.5;\n  }\n\n  const scoreRevenue =\n    Number.isFinite(revenue) &&\n    revenue >= minimumRevenue &&\n    revenue <= maximumRevenue\n      ? 12.5\n      : 0;\n\n  let scoreHeadcount = 0;\n\n  if (\n    Number.isFinite(companySize) &&\n    companySize >= 10 &&\n    companySize <= 500\n  ) {\n    scoreHeadcount = 7.5;\n  } else if (\n    Number.isFinite(companySize) &&\n    (\n      (\n        companySize >= 1 &&\n        companySize < 10\n      ) ||\n      (\n        companySize > 500 &&\n        companySize <= 1000\n      )\n    )\n  ) {\n    scoreHeadcount = 5;\n  } else if (\n    Number.isFinite(companySize) &&\n    companySize > 1000\n  ) {\n    scoreHeadcount = 2.5;\n  }\n\n  const scoreLocation =\n    approvedLocation\n      ? 10\n      : isUS\n        ? 5\n        : 0;\n\n  const scoreIndustry =\n    exactIndustryMatch\n      ? 7.5\n      : adjacentIndustryMatch\n        ? 3.75\n        : 0;\n\n  const totalPoints =\n    scoreTitle +\n    scoreSeniority +\n    scoreRevenue +\n    scoreHeadcount +\n    scoreLocation +\n    scoreIndustry;\n\n  const maxPossiblePoints = 65;\n\n  const normalizedScore =\n    Number(\n      (\n        (\n          totalPoints /\n          maxPossiblePoints\n        ) *\n        100\n      ).toFixed(1)\n    );\n\n  const leadGrade =\n    normalizedScore >= 85\n      ? 'A'\n      : normalizedScore >= 70\n        ? 'B'\n        : 'C';\n\n  const uniqueRejectionReasons =\n    unique(\n      rejectionReasons\n    );\n\n  const uniqueReviewReasons =\n    unique(\n      reviewReasons\n    );\n\n  const uniqueMissingInformation =\n    unique(\n      missingInformation\n    );\n\n  /*\n   * Qualification status.\n   */\n\n  let qualificationStatus;\n\n  if (\n    uniqueRejectionReasons.length >\n    0\n  ) {\n    qualificationStatus =\n      'Rejected';\n  } else if (\n    uniqueReviewReasons.length >\n      0 ||\n    !requiredFieldsComplete ||\n    leadGrade !== 'A'\n  ) {\n    qualificationStatus =\n      'Needs Review';\n  } else {\n    qualificationStatus =\n      'Qualified';\n  }\n\n  /*\n   * Correct B2C sheet routing.\n   */\n\n  let destinationTab =\n    'Needs Review Other Leads';\n\n  if (\n    qualificationStatus ===\n    'Qualified'\n  ) {\n    if (\n      requestedIcp ===\n      'real_estate'\n    ) {\n      destinationTab =\n        isSkiState\n          ? 'B2C RE Ski States'\n          : isMajorCity\n            ? 'B2C RE Major Cities'\n            : 'Needs Review Other Leads';\n    } else if (\n      requestedIcp ===\n      'finance'\n    ) {\n      destinationTab =\n        isSkiState\n          ? 'B2C Finance Ski States'\n          : isMajorCity\n            ? 'B2C Finance Major Cities'\n            : 'Needs Review Other Leads';\n    } else {\n      destinationTab =\n        approvedLocation\n          ? 'B2C Exec General'\n          : 'Needs Review Other Leads';\n    }\n  }\n\n  const revenueText =\n    Number.isFinite(revenue)\n      ? `$${(\n          revenue /\n          1_000_000\n        ).toFixed(1)}M`\n      : 'unconfirmed revenue';\n\n  const publicSignalText =\n    unique([\n      skiSignal\n        ? 'ski/winter travel'\n        : '',\n\n      familyTravelSignal\n        ? 'family travel'\n        : '',\n\n      luxurySignal\n        ? 'luxury/HNW/private-client access'\n        : '',\n    ]);\n\n  /*\n   * GPT Summary and SDR Note.\n   */\n\n  const gptSummary =\n    `${lead.full_name ?? 'This contact'} is ${lead.job_title ?? 'a contact'} at ${companyName || 'an unidentified company'} in ${personCity || personState || 'an unconfirmed location'}. ` +\n    `The company is reported at approximately ${revenueText} in annual revenue and ${Number.isFinite(companySize) ? companySize : 'an unconfirmed number of'} employees. ` +\n    `${\n      exactIndustryMatch\n        ? `The company matches the ${rule.label} ICP.`\n        : adjacentIndustryMatch\n          ? `The company is adjacent to the ${rule.label} ICP and needs verification.`\n          : `The company does not match the requested ${rule.label} ICP.`\n    } ` +\n    `${\n      publicSignalText.length\n        ? `Public signals found: ${publicSignalText.join(', ')}.`\n        : 'No reliable public ski, family-travel, or luxury-travel signal was confirmed.'\n    }`;\n\n  const sdrNote =\n    `Automated ${rule.label} lead from Apify. ` +\n    `Status: ${qualificationStatus}; score ${normalizedScore}/100 (${leadGrade}). ` +\n    `${\n      uniqueRejectionReasons.length\n        ? `Reject because: ${uniqueRejectionReasons.join('; ')}.`\n        : uniqueReviewReasons.length\n          ? `Review because: ${uniqueReviewReasons.join('; ')}.`\n          : 'Strong title, revenue, industry, and location fit.'\n    } ` +\n    `Recommended tab: ${destinationTab}.`;\n\n  const researchConfidence =\n    uniqueMissingInformation.length ===\n      0 &&\n    Number.isFinite(revenue) &&\n    Number.isFinite(companySize)\n      ? 'High'\n      : uniqueMissingInformation.length <=\n          2\n        ? 'Medium'\n        : 'Low';\n\n  reviewedLeads.push({\n    json: {\n      ...lead,\n\n      revenue_numeric:\n        revenue,\n\n      requested_icp:\n        requestedIcp,\n\n      assigned_category:\n        rule.label,\n\n      destination_tab:\n        destinationTab,\n\n      ownership_or_equity_verified:\n        ownershipEvidence,\n\n      approved_b2c_location:\n        approvedLocation,\n\n      location_group:\n        isSkiState\n          ? 'Ski State'\n          : isMajorCity\n            ? 'Major Affluent City'\n            : 'Other US Market',\n\n      industry_match:\n        exactIndustryMatch\n          ? 'Exact'\n          : adjacentIndustryMatch\n            ? 'Adjacent'\n            : 'No Match',\n\n      required_fields_complete:\n        requiredFieldsComplete,\n\n      /*\n       * Fields matching the B2C template.\n       */\n\n      score_title:\n        scoreTitle,\n\n      score_seniority:\n        scoreSeniority,\n\n      score_revenue:\n        scoreRevenue,\n\n      score_headcount:\n        scoreHeadcount,\n\n      score_location:\n        scoreLocation,\n\n      score_industry:\n        scoreIndustry,\n\n      total_points:\n        totalPoints,\n\n      max_possible_points:\n        maxPossiblePoints,\n\n      normalized_score:\n        normalizedScore,\n\n      lead_score:\n        normalizedScore,\n\n      lead_grade:\n        leadGrade,\n\n      fit_score:\n        Math.max(\n          1,\n          Math.min(\n            10,\n            Math.round(\n              normalizedScore /\n              10\n            )\n          )\n        ),\n\n      qualification_status:\n        qualificationStatus,\n\n      rejection_reasons:\n        uniqueRejectionReasons.join(\n          '; '\n        ),\n\n      review_reasons:\n        uniqueReviewReasons.join(\n          '; '\n        ),\n\n      missing_information:\n        uniqueMissingInformation.join(\n          '; '\n        ),\n\n      fit_notes:\n        unique(\n          positiveSignals\n        ).join('; '),\n\n      research_confidence:\n        researchConfidence,\n\n      gpt_summary:\n        gptSummary,\n\n      sdr_note:\n        sdrNote,\n\n      lead_source:\n        'Apify',\n\n      added_by:\n        config.added_by ??\n        'OpenClaw',\n\n      date_added:\n        new Date()\n          .toISOString()\n          .slice(0, 10),\n\n      /*\n       * Duplicate checking happens in later nodes,\n       * so the lead is not marked Ready here.\n       */\n\n      duplicate_check_status:\n        'Pending',\n\n      next_step:\n        qualificationStatus ===\n          'Qualified'\n          ? 'Check Monday.com and the B2C master sheet for duplicates, then append to the recommended tab'\n          : qualificationStatus ===\n              'Needs Review'\n            ? 'Manually verify ownership, company fit, missing information, and destination tab'\n            : 'Do not add to an active B2C working tab',\n    },\n  });\n}\n\n/*\n * Remove duplicates inside this Apify batch.\n * This does not replace the later sheet and\n * Monday.com duplicate checks.\n */\n\nconst bestByPerson =\n  new Map();\n\nfor (\n  const item\n  of reviewedLeads\n) {\n  const lead = item.json;\n\n  const linkedIn =\n    normalizeLinkedIn(\n      lead.linkedin\n    );\n\n  const email =\n    normalizeText(\n      lead.email\n    );\n\n  const nameCompany = [\n    normalizeText(\n      lead.full_name\n    ),\n    normalizeText(\n      lead.company_name\n    ),\n  ].join('|');\n\n  const nameTitle = [\n    normalizeText(\n      lead.full_name\n    ),\n    normalizeText(\n      lead.job_title\n    ),\n  ].join('|');\n\n  const personKey =\n    linkedIn\n      ? `linkedin:${linkedIn}`\n      : email\n        ? `email:${email}`\n        : nameCompany !== '|'\n          ? `name-company:${nameCompany}`\n          : `name-title:${nameTitle}`;\n\n  const existing =\n    bestByPerson.get(\n      personKey\n    );\n\n  if (\n    !existing ||\n    Number(\n      lead.lead_score\n    ) >\n      Number(\n        existing.json.lead_score\n      )\n  ) {\n    bestByPerson.set(\n      personKey,\n      item\n    );\n  }\n}\n\nconst statusPriority = {\n  Qualified: 1,\n  'Needs Review': 2,\n  Rejected: 3,\n};\n\nreturn [\n  ...bestByPerson.values(),\n].sort((a, b) => {\n  const statusDifference =\n    (\n      statusPriority[\n        a.json\n          .qualification_status\n      ] ?? 99\n    ) -\n    (\n      statusPriority[\n        b.json\n          .qualification_status\n      ] ?? 99\n    );\n\n  if (\n    statusDifference !== 0\n  ) {\n    return statusDifference;\n  }\n\n  return (\n    Number(\n      b.json.lead_score\n    ) -\n    Number(\n      a.json.lead_score\n    )\n  );\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        -80
+      ],
+      "id": "dc4ca5a6-a04b-423d-9db0-541e10ada919",
+      "name": "Review & Score B2C Leads"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        -224
+      ],
+      "id": "d55669de-8ba1-4267-a461-f5c28c4fb1ab",
+      "name": "Merge6"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        -224
+      ],
+      "id": "5ad21c6e-6cdd-4b87-bff9-d71439cbbc45",
+      "name": "B2C RE Ski States",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        256
+      ],
+      "id": "efe6f3c2-de71-405f-93c8-f4411e918e6d",
+      "name": "Merge7"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        736
+      ],
+      "id": "a8b2ef9a-e593-488a-a67b-5974e3c124e2",
+      "name": "Merge8"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.email }}",
+            "Date/Year": "={{ $now }}",
+            "Full Name": "={{ $json.full_name }}",
+            "First Name": "={{ $json.first_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "LinkedIn URL": "={{ $json.linkedin }}",
+            "Title": "={{ $json.job_title }}",
+            "Company": "={{ $json.company_name }}",
+            "Website / Domain": "={{ $json.company_website }}",
+            "Company LinkedIn": "={{ $json.company_linkedin }}",
+            "Industry": "={{ $json.industry }}",
+            "Location / City": "={{ $json.city }}",
+            "State": "={{ $json.state }}",
+            "Revenue": "={{ $json.company_annual_revenue_clean }}",
+            "Employee Count": "={{ $json.company_size }}",
+            "Status": "New Lead",
+            "Next Step": "Ready",
+            "Notes": "={{ $json.sdr_note }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        160
+      ],
+      "id": "69e14c8e-3d63-46e4-970d-72ba57b563d1",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland 2026 Master leads: b2c",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.email }}",
+            "Date/Year": "={{ $now }}",
+            "Full Name": "={{ $json.full_name }}",
+            "First Name": "={{ $json.first_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "LinkedIn URL": "={{ $json.linkedin }}",
+            "Title": "={{ $json.job_title }}",
+            "Company": "={{ $json.company_name }}",
+            "Website / Domain": "={{ $json.company_website }}",
+            "Company LinkedIn": "={{ $json.company_linkedin }}",
+            "Industry": "={{ $json.industry }}",
+            "Location / City": "={{ $json.city }}",
+            "State": "={{ $json.state }}",
+            "Revenue": "={{ $json.company_annual_revenue_clean }}",
+            "Employee Count": "={{ $json.company_size }}",
+            "Status": "New Lead",
+            "Next Step": "Ready",
+            "Notes": "={{ $json.sdr_note }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        640
+      ],
+      "id": "054488c3-7529-4b8f-b44b-fa30a1cc137a",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check Apify Run Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Apify Run Status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Apify Dataset Items": {
+      "main": [
+        [
+          {
+            "node": "Review & Score B2C Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Apify Dataset Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Start Apify Leads Finder2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Qualification Status": {
+      "main": [
+        [
+          {
+            "node": "B2C RE Ski States",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get items by Benjimin Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Remove Master Sheet Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Monday Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by General Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Get many by Warm Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by Benjimin Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Get items by General Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many by Warm Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Remove Monday Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Start Apify Leads Finder2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start Apify Leads Finder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start Apify Leads Finder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Check Apify Run Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Apify Run Status1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing B2B Private Jet Leads1": {
+      "main": [
+        [
+          {
+            "node": "Remove Master Sheet Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review & Score Private Aviation Leads1": {
+      "main": [
+        [
+          {
+            "node": "Route by Qualification Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Apify Dataset Items1": {
+      "main": [
+        [
+          {
+            "node": "Review & Score Private Aviation Leads1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Get Apify Dataset Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Apify Leads Finder": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Qualification Status1": {
+      "main": [
+        [
+          {
+            "node": "Read Existing B2B Private Jet Leads1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get items by Benjimin Pipeline1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Remove Master Sheet Duplicates1": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Monday Duplicates1": {
+      "main": [
+        [
+          {
+            "node": "Merge7",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by General Pipeline1": {
+      "main": [
+        [
+          {
+            "node": "Get many by Warm Pipeline1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by Benjimin Pipeline1": {
+      "main": [
+        [
+          {
+            "node": "Get items by General Pipeline1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many by Warm Pipeline1": {
+      "main": [
+        [
+          {
+            "node": "Remove Monday Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Check Apify Run Status2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Apify Run Status2": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Existing B2B Private Jet Leads2": {
+      "main": [
+        [
+          {
+            "node": "Remove Master Sheet Duplicates2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review & Score Private Aviation Leads2": {
+      "main": [
+        [
+          {
+            "node": "Route by Qualification Status2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Apify Dataset Items2": {
+      "main": [
+        [
+          {
+            "node": "Review & Score Private Aviation Leads2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Get Apify Dataset Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Apify Leads Finder1": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Qualification Status2": {
+      "main": [
+        [
+          {
+            "node": "Read Existing B2B Private Jet Leads2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get items by Benjimin Pipeline2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Remove Master Sheet Duplicates2": {
+      "main": [
+        [
+          {
+            "node": "Merge8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Monday Duplicates2": {
+      "main": [
+        [
+          {
+            "node": "Merge8",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by General Pipeline2": {
+      "main": [
+        [
+          {
+            "node": "Get many by Warm Pipeline2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get items by Benjimin Pipeline2": {
+      "main": [
+        [
+          {
+            "node": "Get items by General Pipeline2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many by Warm Pipeline2": {
+      "main": [
+        [
+          {
+            "node": "Remove Monday Duplicates2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review & Score B2C Leads": {
+      "main": [
+        [
+          {
+            "node": "Route by Qualification Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B2C RE Ski States": {
+      "main": [
+        [
+          {
+            "node": "Remove Master Sheet Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge8": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f69f7319-eca8-4436-85bb-44b9029626ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3b409757533339ba74be007a6f3b2f5f6367c29e41ebaeb0e9f6a6dc7a2bb2c7"
+  },
+  "nodeGroups": [],
+  "id": "FzhVMww1LucENA5t",
+  "tags": []
+}

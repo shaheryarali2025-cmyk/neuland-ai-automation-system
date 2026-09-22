@@ -1,0 +1,1490 @@
+{
+  "name": "B2C Leads – Approved to Monday CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4ca6413e-cf55-4696-a723-2552a44d3daa",
+              "leftValue": "={{ $json['CRM Approval'] }}",
+              "rightValue": "Approved ",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            },
+            {
+              "id": "0d3387e3-ef58-4fc3-accb-a0ff648db8e7",
+              "leftValue": "={{ $json['Full Name'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        16
+      ],
+      "id": "bc959046-91dd-46bc-8666-b01366efa601",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $json;\n\nconst approval = String(row[\"CRM Approval\"] || \"\").trim();\nconst industry = String(row[\"Industry\"] || \"\").toLowerCase();\nconst company = String(row[\"Company\"] || \"\").toLowerCase();\n\n// Board is selected by Benjamin through CRM Approval\nconst boardMap = {\n  \"Approved → Benjamin B2B\": \"B2B Pipeline (Benjamin)\",\n  \"Approved → General B2B\": \"General Leads: Email Marketing\",\n  \"Approved → Warm B2C\": \"B2C Pipeline (Warm Leads)\",\n};\n\nconst crmBoard = boardMap[approval] || \"\";\n\n// Type is mapped only from verified company/industry data\nconst typeEvidence = `${industry} ${company}`;\n\nlet mondayType = \"\";\n\nif (/aviation|airline|private jet|jet charter|charter/.test(typeEvidence)) {\n  mondayType = \"Aviation\";\n} else if (/travel|tour|travel agency|concierge|hospitality/.test(typeEvidence)) {\n  mondayType = \"Travel Company\";\n} else if (/property|villa|real estate/.test(typeEvidence)) {\n  mondayType = \"Property Management\";\n} else if (/membership|private club|family office/.test(typeEvidence)) {\n  mondayType = \"Membership\";\n}\n\n// Required-field validation\nconst missingFields = [];\n\nif (!row[\"Full Name\"]) missingFields.push(\"Full Name\");\nif (!row[\"Title\"]) missingFields.push(\"Title\");\nif (!row[\"Company\"]) missingFields.push(\"Company\");\n\nif (!row[\"Email\"] && !row[\"LinkedIn URL\"]) {\n  missingFields.push(\"Email or LinkedIn URL\");\n}\n\nif (!mondayType) {\n  missingFields.push(\"Verified Type\");\n}\n\nif (!crmBoard) {\n  missingFields.push(\"CRM Destination Approval\");\n}\n\nreturn {\n  json: {\n    ...row,\n\n    mondayAccount: row[\"Full Name\"] || \"\",\n    mondayEmail: row[\"Email\"] || \"\",\n    mondayLinkedIn: row[\"LinkedIn URL\"] || \"\",\n    mondayCompany: row[\"Company\"] || \"\",\n    mondayTitle: row[\"Title\"] || \"\",\n    mondayGPTSummary: row[\"Notes\"] || \"\",\n    mondayCompanyProfile: row[\"Company LinkedIn\"] || \"\",\n    mondayCompanyLinkedIn: row[\"Company LinkedIn\"] || \"\",\n    mondayCompanyURL: row[\"Website / Domain\"] || \"\",\n    mondayLocation: row[\"Location / City\"] || \"\",\n    mondayIndustry: row[\"Industry\"] || \"\",\n    mondayRevenue: row[\"Revenue\"] || \"\",\n    mondayFirstName: row[\"First Name\"] || \"\",\n    mondayLastName: row[\"Last Name\"] || \"\",\n\n    mondayType,\n    mondayPlatform: \"LINKEDIN\",\n    mondayLeadSource: \"Apify\",\n    mondayStatus: \"New Lead\",\n\n    mondayLastContact: \"\",\n    mondayNextContact: \"\",\n    mondayTP: \"\",\n\n    mondayNotes: [\n      row[\"Notes\"] || \"\",\n      \"Source: Apify\",\n      \"Platform: LinkedIn\",\n      `Sheet: B2B Travel Leads`,\n      `Source Row: ${row[\"Source Row\"] || row[\"row_number\"] || \"\"}`,\n      `Approved Destination: ${approval}`,\n    ].filter(Boolean).join(\" | \"),\n\n    crmBoard,\n    isValidForCRM: missingFields.length === 0,\n    missingFields: missingFields.join(\", \"),\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "6f20146e-82fc-4be3-80d3-23711adc663a",
+      "name": "Prepare Monday CRM Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.crmBoard }}",
+                    "rightValue": "B2B Pipeline (Benjamin)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4360fa4e-c33c-4416-9391-1eab594f7081"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "B2B Pipeline (Benjamin)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cb30baa2-8748-4b52-9388-edf6d35e40f9",
+                    "leftValue": "={{ $json.crmBoard }}",
+                    "rightValue": "General Leads: Email Marketing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Email Marketing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ba24407a-0cb9-4fba-b1d6-d39630102b3c",
+                    "leftValue": "={{ $json.crmBoard }}",
+                    "rightValue": "B2C Pipeline (Warm Leads)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "B2C Pipeline (Warm Leads)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "0656e2ad-d211-416c-8d5f-7ccc4b1354a8",
+      "name": "Route to Approved CRM Board"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f0e0f896-bb5c-40de-a26c-daabd01a3238",
+              "leftValue": "={{ $json.isValidForCRM }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        16
+      ],
+      "id": "17cd846c-c71d-42a8-989f-431e28df252f",
+      "name": "Is Lead Valid for CRM?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        112
+      ],
+      "id": "a8d41fad-8fe5-49aa-8b1e-89dabcbea767",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "boardId": "9661187741",
+        "groupId": "group_mm0mxgx",
+        "name": "={{ $json.mondayAccount }}",
+        "additionalFields": {
+          "columnValues": "{}"
+        }
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -288
+      ],
+      "id": "84c4ebc2-deb9-4dd6-b1af-e1019d246aa4",
+      "name": "Create an item in a board's group",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "changeMultipleColumnValues",
+        "boardId": "9661187741",
+        "itemId": "={{ $json.id }}",
+        "columnValues": "={{ JSON.stringify({\n  \"color_mkt9jnr2\": {\n    \"index\": 5\n  },\n\n  \"color_mkt9j9qk\": {\n    \"index\": 0\n  },\n\n  \"color_mkt99m1w\": {\n    \"index\": 16\n  },\n\n  \"text_mkt9byva\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayLinkedIn,\n\n  \"email_mkt9gkgm\": {\n    \"email\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail,\n    \"text\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail\n  },\n\n  \"text_mkt98fj8\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayTitle,\n\n  \"text_mkt9cdz4\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayCompany,\n\n  \"text_mkt9h1ds\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayCompanyURL,\n\n  \"text_mktadpvb\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayFirstName,\n\n  \"text_mkt9mjab\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayLastName,\n\n  \"text_mkt9q24w\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayCompanyLinkedIn,\n\n  \"company_profile\": {\n    \"url\": $(\"Prepare Monday CRM Fields\").item.json.mondayCompanyProfile,\n    \"text\": \"Company LinkedIn\"\n  },\n\n  \"text_mkt9g0wy\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayLocation,\n\n  \"text_mkt9p1s2\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayIndustry,\n\n  \"text_mkt9ggpj\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayRevenue,\n\n  \"text_mkt9n7z1\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayGPTSummary,\n\n  \"text_mkta104n\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayNotes\n}) }}"
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -288
+      ],
+      "id": "9c8afa6b-3ba5-4ad7-876d-1e7d5d9ea7fc",
+      "name": "Change multiple column values for a board item",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "boardId": "18198302679",
+        "groupId": "group_mm5z6zsj",
+        "name": "={{ $json.mondayAccount }}",
+        "additionalFields": {
+          "columnValues": "{}"
+        }
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "5fe2ae63-5c68-4aa5-a6a4-5bc6381b89f1",
+      "name": "Create an item in a board's group1",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "changeMultipleColumnValues",
+        "boardId": "18198302679",
+        "itemId": "={{ $json.id }}",
+        "columnValues": "={{ JSON.stringify({\n  \"color_mkt9jnr2\": {\n    \"index\": 3\n  },\n\n  \"color_mkt9j9qk\": {\n    \"index\": 0\n  },\n\n  \"color_mkt99m1w\": {\n    \"index\": ({\n      \"Travel Company\": 1,\n      \"Property Management\": 2,\n      \"Group travel\": 6,\n      \"Transportation\": 7,\n      \"Membership\": 8,\n      \"Potential Lead\": 9,\n      \"contractor\": 10,\n      \"Personal\": 11,\n      \"General\": 12,\n      \"Activities\": 13,\n      \"Ski Therapy\": 14,\n      \"Aviation\": 16,\n      \"Other\": 17,\n      \"B2C\": 18\n    })[$(\"Prepare Monday CRM Fields\").item.json.mondayType] ?? 17\n  },\n\n  \"text_mkt9byva\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayLinkedIn || \"\",\n\n  \"email_mkt9gkgm\": {\n    \"email\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail || \"\",\n    \"text\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail || \"\"\n  },\n\n  \"company_profile\": {\n    \"url\": $(\"Prepare Monday CRM Fields\").item.json[\"Website / Domain\"] || \"\",\n    \"text\": $(\"Prepare Monday CRM Fields\").item.json.mondayCompany || \"Company Website\"\n  },\n\n  \"text_mkt98fj8\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayTitle || \"\",\n\n  \"text_mkt9cdz4\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayCompany || \"\",\n\n  \"text_mkt9h1ds\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Website / Domain\"] || \"\",\n\n  \"text_mkt9mjab\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Last Name\"] || \"\",\n\n  \"text_mktadpvb\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"First Name\"] || \"\",\n\n  \"text_mkt9n7z1\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayGPTSummary\n    || $(\"Prepare Monday CRM Fields\").item.json.mondayNotes\n    || $(\"Prepare Monday CRM Fields\").item.json[\"Notes\"]\n    || \"\",\n\n  \"text_mkt9q24w\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Company LinkedIn\"] || \"\",\n\n  \"text_mkt9g0wy\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Location / City\"] || \"\"\n}) }}"
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": "b0c1f2c9-51eb-43cf-a56b-0d4634d7096b",
+      "name": "Change multiple column values for a board item1",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "boardId": "9782799884",
+        "groupId": "group_mm5zq3ng",
+        "name": "={{ $json.mondayAccount }}",
+        "additionalFields": {
+          "columnValues": "{}"
+        }
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "cd5e4cef-020c-4b83-b952-ba6a8aeabb3e",
+      "name": "Create an item in a board's group2",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "changeMultipleColumnValues",
+        "boardId": "9782799884",
+        "itemId": "={{ $json.id }}",
+        "columnValues": "={{ JSON.stringify({\n  \"color_mkt9jnr2\": {\n    \"index\": 2\n  },\n\n  \"color_mkt9j9qk\": {\n    \"index\": 0\n  },\n\n  \"text_mkt9byva\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayLinkedIn || \"\",\n\n  \"email_mkt9gkgm\": {\n    \"email\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail || \"\",\n    \"text\": $(\"Prepare Monday CRM Fields\").item.json.mondayEmail || \"\"\n  },\n\n  \"company_profile\": {\n    \"url\": $(\"Prepare Monday CRM Fields\").item.json[\"Website / Domain\"] || \"\",\n    \"text\": $(\"Prepare Monday CRM Fields\").item.json.mondayCompany || \"Company Website\"\n  },\n\n  \"text_mkt98fj8\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayTitle || \"\",\n\n  \"text_mkt9cdz4\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayCompany || \"\",\n\n  \"text_mkt9h1ds\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Website / Domain\"] || \"\",\n\n  \"text_mkt9mjab\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Last Name\"] || \"\",\n\n  \"text_mktadpvb\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"First Name\"] || \"\",\n\n  \"text_mkt9n7z1\":\n    $(\"Prepare Monday CRM Fields\").item.json.mondayGPTSummary\n    || $(\"Prepare Monday CRM Fields\").item.json.mondayNotes\n    || $(\"Prepare Monday CRM Fields\").item.json[\"Notes\"]\n    || \"\",\n\n  \"text_mkt9q24w\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Company LinkedIn\"] || \"\",\n\n  \"text_mkt9g0wy\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Location / City\"] || \"\",\n\n  \"text_mkt9p1s2\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Industry\"] || \"\",\n\n  \"text_mkt9k9s6\":\n    $(\"Prepare Monday CRM Fields\").item.json[\"Business Age\"] || \"\"\n}) }}"
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "e2e353fd-8b6f-4e63-a9f8-5373944cca4c",
+      "name": "Change multiple column values for a board item2",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland Master Sheet B2C",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Route to Approved CRM Board').item.json.Email }}",
+            "CRM Approval": "Done"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CRM Approval",
+              "displayName": "CRM Approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        -288
+      ],
+      "id": "ece7309b-0205-440a-ac70-00d20d069106",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        16
+      ],
+      "id": "3568eeec-d9f3-45d7-8e81-03e912f4827d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland Master Sheet B2C",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        16
+      ],
+      "id": "3e872578-1d7c-49c7-974c-f3be28fa00f7",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland Master Sheet B2C",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Route to Approved CRM Board').item.json.Email }}",
+            "CRM Approval": "Done"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CRM Approval",
+              "displayName": "CRM Approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        -96
+      ],
+      "id": "8c7f15fe-663a-4932-836c-f90b70506e35",
+      "name": "Update row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA",
+          "mode": "list",
+          "cachedResultName": "Neuland Master Sheet B2C",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 557927493,
+          "mode": "list",
+          "cachedResultName": "B2C RE Ski States",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pVyGjhCGdQhAeXygcewVIITaXlEUFS2M4Rec_8A0NnA/edit#gid=557927493"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Route to Approved CRM Board').item.json.Email }}",
+            "CRM Approval": "Done"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Source File",
+              "displayName": "Source File",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Tab",
+              "displayName": "Source Tab",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Row",
+              "displayName": "Source Row",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Source Group / Year",
+              "displayName": "Source Group / Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Category",
+              "displayName": "Assigned Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date/Year",
+              "displayName": "Date/Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Website / Domain",
+              "displayName": "Website / Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Location / City",
+              "displayName": "Location / City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Revenue",
+              "displayName": "Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Employee Count",
+              "displayName": "Employee Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Step",
+              "displayName": "Next Step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CRM Approval",
+              "displayName": "CRM Approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Raw Row Data",
+              "displayName": "Raw Row Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1568,
+        96
+      ],
+      "id": "1bd972a7-e305-4bdf-9563-c7ece643b960",
+      "name": "Update row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hokla9SytHZt4zfc",
+          "name": "Benjimin Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monday CRM Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monday CRM Fields": {
+      "main": [
+        [
+          {
+            "node": "Is Lead Valid for CRM?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Lead Valid for CRM?": {
+      "main": [
+        [
+          {
+            "node": "Route to Approved CRM Board",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Approved CRM Board": {
+      "main": [
+        [
+          {
+            "node": "Create an item in a board's group",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an item in a board's group1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an item in a board's group2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an item in a board's group": {
+      "main": [
+        [
+          {
+            "node": "Change multiple column values for a board item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change multiple column values for a board item": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an item in a board's group1": {
+      "main": [
+        [
+          {
+            "node": "Change multiple column values for a board item1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an item in a board's group2": {
+      "main": [
+        [
+          {
+            "node": "Change multiple column values for a board item2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change multiple column values for a board item1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change multiple column values for a board item2": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8457af25-f6fd-415e-b3fd-161816e5654e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3b409757533339ba74be007a6f3b2f5f6367c29e41ebaeb0e9f6a6dc7a2bb2c7"
+  },
+  "nodeGroups": [],
+  "id": "o2FWCGwTx6KLvfxS",
+  "tags": []
+}

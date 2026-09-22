@@ -1,0 +1,575 @@
+{
+  "name": "Instantly to Monday CRM — Reply & Activity Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Instantly-received-message",
+        "options": {
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -576,
+        0
+      ],
+      "id": "d657edac-94ca-473d-b381-72fc9a40ac37",
+      "name": "Webhook",
+      "webhookId": "a3f8d2f8-e8dd-43a1-82b6-772c36ce0dce"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bda8596d-ca86-490c-b2c0-c132a4491417",
+              "name": "Event_Type",
+              "value": "={{ $json.body.event_type }}",
+              "type": "string"
+            },
+            {
+              "id": "5b6e4bde-8f9c-4834-bf67-315e92953063",
+              "name": "Lead_Email",
+              "value": "={{ $json.body.lead_email }}",
+              "type": "string"
+            },
+            {
+              "id": "6c8ba85e-a4c1-4e57-89c2-6a234a42ac8f",
+              "name": "First_Name",
+              "value": "={{ $json.body.firstName }}",
+              "type": "string"
+            },
+            {
+              "id": "31d29e4a-3ae7-42f9-89bb-eae909b68398",
+              "name": "Last_Name",
+              "value": "={{ $json.body.lastName }}",
+              "type": "string"
+            },
+            {
+              "id": "6cee212e-71a1-4a2c-8d6e-41fe109a3f63",
+              "name": "Full_Name",
+              "value": "={{ [$json.body.firstName, $json.body.lastName].filter(Boolean).join(' ') }}",
+              "type": "string"
+            },
+            {
+              "id": "6b566401-86ab-47e2-a446-91d02c21634e",
+              "name": "Campaign_id",
+              "value": "={{ $json.body.campaign_id }}",
+              "type": "string"
+            },
+            {
+              "id": "80177244-659e-40ab-b22a-83aac0f5f8c0",
+              "name": "Email_Account",
+              "value": "={{ $json.body.email_account }}",
+              "type": "string"
+            },
+            {
+              "id": "4bdda716-030f-4513-bfe2-c2e7996d6769",
+              "name": "Reply_Subject",
+              "value": "={{ $json.body.reply_subject }}",
+              "type": "string"
+            },
+            {
+              "id": "1272a29a-2c74-4b36-b51c-bfe194e341d9",
+              "name": "Latest_Reply",
+              "value": "={{ $json.body.reply_text_snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "bb838884-3472-456d-b3e7-57eb5735044c",
+              "name": "Reply_html",
+              "value": "={{ $json.body.reply_html }}",
+              "type": "string"
+            },
+            {
+              "id": "bd907e7d-84d4-41f8-9983-44726141d96a",
+              "name": "Step",
+              "value": "={{ $json.body.step }}",
+              "type": "number"
+            },
+            {
+              "id": "4776fa25-c0cd-42e2-b825-102cc760324b",
+              "name": "Variant",
+              "value": "={{ $json.body.variant }}",
+              "type": "number"
+            },
+            {
+              "id": "50e4f3e9-917c-4137-8864-15f048b16ed7",
+              "name": "Reply_Timestamp",
+              "value": "={{ $json.body.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "3beeb768-48ec-4b63-8a39-8aa0589fc611",
+              "name": "Unibox_url",
+              "value": "={{ $json.body.unibox_url }}",
+              "type": "string"
+            },
+            {
+              "id": "a769cc11-af52-4c04-a4be-067c32f42898",
+              "name": "=Thread_id_from_url",
+              "value": "={{ $json.body.unibox_url.split('thread_search=thread:')[1].split('&')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "808a1d44-b69c-44ac-a909-3776f8e418f7",
+              "name": "Email_id",
+              "value": "={{ $json.body.email_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        0
+      ],
+      "id": "2810c110-b462-4392-9b02-b5ce856d6e69",
+      "name": "Normalize Instantly Reply"
+    },
+    {
+      "parameters": {
+        "resource": "unibox",
+        "operation": "get",
+        "messageId": "={{ $json.Email_id }}"
+      },
+      "type": "n8n-nodes-instantly.instantly",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "1f2559b8-4a5e-4fbe-ac62-6a33661e52ca",
+      "name": "Normalize Instantly Reply1",
+      "credentials": {
+        "instantlyApi": {
+          "id": "GW0WqjuyQRaQboqp",
+          "name": "Instantly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.instantly.ai/api/v2/emails",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "instantlyApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "search",
+              "value": "={{ 'thread:' + $json.thread_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        48,
+        0
+      ],
+      "id": "449e7aac-0d7e-49ce-9d7c-d8f2725b932d",
+      "name": "Instantly - Get Full Thread",
+      "credentials": {
+        "instantlyApi": {
+          "id": "GW0WqjuyQRaQboqp",
+          "name": "Instantly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $input.first().json;\n\nconst messages = Array.isArray(source.items)\n  ? source.items\n  : [];\n\nif (messages.length === 0) {\n  throw new Error('Instantly thread contains no messages');\n}\n\n// Exact thread ID output ke andar se uthao\nconst targetThreadId = messages[0].thread_id;\n\n// Sirf same thread ke messages aur oldest → newest sorting\nconst sortedMessages = messages\n  .filter((message) => message.thread_id === targetThreadId)\n  .sort((a, b) => {\n    return (\n      new Date(a.timestamp_email).getTime() -\n      new Date(b.timestamp_email).getTime()\n    );\n  });\n\n// Lead ka received message\nconst receivedMessage =\n  sortedMessages.find((message) => message.ue_type === 2) ||\n  sortedMessages[0];\n\n// Original campaign email\nconst sentMessage =\n  sortedMessages.find((message) => message.ue_type === 1) ||\n  sortedMessages[0];\n\n// Latest received reply\nconst latestReceived =\n  [...sortedMessages]\n    .reverse()\n    .find((message) => message.ue_type === 2) ||\n  receivedMessage;\n\nreturn [\n  {\n    json: {\n      thread_id: targetThreadId,\n\n      lead_email:\n        receivedMessage.lead ||\n        receivedMessage.from_address_email ||\n        '',\n\n      full_name:\n        receivedMessage.from_address_json?.[0]?.name ||\n        '',\n\n      campaign_id:\n        receivedMessage.campaign_id ||\n        sentMessage.campaign_id ||\n        '',\n\n      sender_account:\n        sentMessage.from_address_email ||\n        sentMessage.eaccount ||\n        '',\n\n      subject:\n        latestReceived.subject ||\n        sentMessage.subject ||\n        '',\n\n      latest_reply:\n        latestReceived.content_preview ||\n        latestReceived.body?.text ||\n        '',\n\n      latest_reply_timestamp:\n        latestReceived.timestamp_email ||\n        '',\n\n      message_count: sortedMessages.length,\n\n      messages: sortedMessages,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "50b33a4b-7109-4c40-a4fc-f15cab253ec4",
+      "name": "Prepare Instantly Thread"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "getByColumnValue",
+        "boardId": "9661187741",
+        "columnId": "email_mkt9gkgm",
+        "columnValue": "={{ $json.lead_email }}",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        464,
+        0
+      ],
+      "id": "674984f7-6285-4edf-9bf1-f1ced15d7731",
+      "name": "Search Benjamin B2B",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1550beb6-3702-4d2d-9cb1-002577a7710c",
+              "leftValue": "={{ Boolean($json.id) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "8bce6bbc-2e24-45c0-8963-418b6a9ed491",
+      "name": "Found in Benjamin B2B?"
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "operation": "changeMultipleColumnValues",
+        "boardId": "9661187741",
+        "itemId": "={{ $json.id }}",
+        "columnValues": "={{ JSON.stringify({\n  \"date_mkt948by\": {\n    \"date\": $(\"Prepare Instantly Thread\").first().json.latest_reply_timestamp.slice(0, 10)\n  },\n  \"color_mkt9j9qk\": {\n    \"label\": \"Instantly\"\n  },\n  \"color_mkt9jnr2\": {\n    \"label\": \"Email/Instantly Response\"\n  }\n}) }}"
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -96
+      ],
+      "id": "f9709f42-0ede-49ae-ac02-7850a9173aeb",
+      "name": "Change multiple column values for a board item",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "boardItem",
+        "boardId": "9661187741",
+        "groupId": "group_mm0mxgx",
+        "name": "={{ $(\"Prepare Instantly Thread\").first().json.full_name || $(\"Prepare Instantly Thread\").first().json.lead_email }}",
+        "additionalFields": {
+          "columnValues": "={{ JSON.stringify({\n  \"email_mkt9gkgm\": {\n    \"email\": $(\"Prepare Instantly Thread\").first().json.lead_email,\n    \"text\": $(\"Prepare Instantly Thread\").first().json.lead_email\n  },\n  \"date_mkt948by\": {\n    \"date\": $(\"Prepare Instantly Thread\").first().json.latest_reply_timestamp.slice(0, 10)\n  },\n  \"color_mkt9j9qk\": {\n    \"label\": \"Instantly\"\n  },\n  \"color_mkt9jnr2\": {\n    \"label\": \"Email/Instantly Response\"\n  }\n}) }}"
+        }
+      },
+      "type": "n8n-nodes-base.mondayCom",
+      "typeVersion": 1,
+      "position": [
+        880,
+        96
+      ],
+      "id": "be6fece5-b51f-45fe-ab50-ddd105021bae",
+      "name": "Create an item in a board's group",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70b274f5-2453-47c0-a2bd-677880d2b3a3",
+              "name": "monday_item_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2fb7ac2f-221c-4cf6-9446-ee772a79fc77",
+              "name": "lead_email",
+              "value": "={{ $('Prepare Instantly Thread').first().json.lead_email }}",
+              "type": "string"
+            },
+            {
+              "id": "a9fea1c0-776f-42d3-8d40-fbd3e026664f",
+              "name": "lead_name",
+              "value": "={{ $('Prepare Instantly Thread').first().json.full_name }}",
+              "type": "string"
+            },
+            {
+              "id": "529fc2de-f82a-4a77-a391-36cd17df98cb",
+              "name": "message",
+              "value": "={{ $('Prepare Instantly Thread').first().json.messages }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "a80d283b-b99b-4ccb-a25f-1af6de9c7524",
+      "name": "Prepare Monday Conversation"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "message",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -16
+      ],
+      "id": "74e2ebc8-a51b-441e-ad24-3deea4e56176",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const message = $json.message || {};\nconst leadEmail = String($json.lead_email || '').trim().toLowerCase();\nconst fromEmail = String(message.from_address_email || '').trim().toLowerCase();\n\nconst isLeadResponse = fromEmail === leadEmail;\n\nlet activityTitle;\nlet direction;\n\nif (isLeadResponse) {\n  activityTitle = 'Instantly Lead Response';\n  direction = 'Incoming';\n} else if (Number(message.ue_type) === 1) {\n  activityTitle = 'Instantly Campaign Email';\n  direction = 'Outgoing';\n} else {\n  activityTitle = \"Benjamin's Response\";\n  direction = 'Outgoing';\n}\n\n// Received email bodies often include the entire quoted conversation.\n// Remove that quoted section because every message is being logged separately.\nlet contentText = String(\n  message.body?.text ||\n  message.content_preview ||\n  ''\n);\n\ncontentText = contentText\n  .split(/\\nOn .+wrote:\\s*\\n/i)[0]\n  .split(/\\nLe .+a écrit\\s*:\\s*\\n/i)[0]\n  .trim();\n\nlet contentHtml = String(message.body?.html || '');\n\ncontentHtml = contentHtml\n  .split(/<div[^>]*class=[\"'][^\"']*gmail_quote[^\"']*[\"'][^>]*>/i)[0]\n  .split(/<blockquote[^>]*class=[\"'][^\"']*gmail_quote[^\"']*[\"'][^>]*>/i)[0]\n  .trim();\n\nconst finalContent =\n  contentHtml ||\n  contentText ||\n  message.content_preview ||\n  'Email content unavailable';\n\nreturn {\n  json: {\n    monday_item_id: String($json.monday_item_id),\n    lead_email: $json.lead_email,\n    lead_name: $json.lead_name,\n\n    instantly_email_id: message.id || '',\n    message_id: message.message_id || '',\n    thread_id: message.thread_id || '',\n\n    activity_title: activityTitle,\n    direction,\n\n    from_email: message.from_address_email || '',\n    to_email: message.to_address_email_list || '',\n    subject: message.subject || 'Instantly email',\n    content: finalContent,\n\n    timestamp:\n      message.timestamp_email ||\n      message.timestamp_created ||\n      new Date().toISOString(),\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        -16
+      ],
+      "id": "1b70d640-7efb-4eec-936b-ab93deedc548",
+      "name": "Prepare Email Activity"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.monday.com/v2",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mondayComApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "API-Version",
+              "value": "2026-07"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    query: `\n      mutation (\n        $itemId: ID!\n        $activityId: String!\n        $title: String!\n        $summary: String!\n        $content: String!\n        $timestamp: ISO8601DateTime!\n      ) {\n        create_timeline_item(\n          item_id: $itemId\n          custom_activity_id: $activityId\n          title: $title\n          summary: $summary\n          content: $content\n          timestamp: $timestamp\n        ) {\n          id\n        }\n      }\n    `,\n    variables: {\n      itemId: String($json.monday_item_id),\n\n      activityId: \"15376fb8-826a-4cdb-84f5-a16b3e3bfd16\",\n\n      title: $json.activity_title,\n\n      summary: `${$json.direction} — ${$json.subject}`.slice(0, 255),\n\n      content:\n        `From: ${$json.from_email}<br>` +\n        `To: ${$json.to_email}<br>` +\n        `Subject: ${$json.subject}<br>` +\n        `Source: Instantly<br><br>` +\n        `${$json.content}`,\n\n      timestamp: $json.timestamp\n    }\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1728,
+        -16
+      ],
+      "id": "bfdc034a-e1c1-479d-815b-df3c876f33b2",
+      "name": "Monday — Create Emails & Activities Entry1",
+      "credentials": {
+        "mondayComApi": {
+          "id": "8hC0BsLWNoDfBz6s",
+          "name": "Monday.com account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Instantly Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Instantly Reply": {
+      "main": [
+        [
+          {
+            "node": "Normalize Instantly Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Instantly Reply1": {
+      "main": [
+        [
+          {
+            "node": "Instantly - Get Full Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instantly - Get Full Thread": {
+      "main": [
+        [
+          {
+            "node": "Prepare Instantly Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Instantly Thread": {
+      "main": [
+        [
+          {
+            "node": "Search Benjamin B2B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Benjamin B2B": {
+      "main": [
+        [
+          {
+            "node": "Found in Benjamin B2B?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Found in Benjamin B2B?": {
+      "main": [
+        [
+          {
+            "node": "Change multiple column values for a board item",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an item in a board's group",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Change multiple column values for a board item": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monday Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an item in a board's group": {
+      "main": [
+        [
+          {
+            "node": "Prepare Monday Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Monday Conversation": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Activity": {
+      "main": [
+        [
+          {
+            "node": "Monday — Create Emails & Activities Entry1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "acdf8fa3-6a33-477c-a568-518b1b450b1c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3b409757533339ba74be007a6f3b2f5f6367c29e41ebaeb0e9f6a6dc7a2bb2c7"
+  },
+  "nodeGroups": [],
+  "id": "I7KoFRqT5TnIkEYq",
+  "tags": []
+}
